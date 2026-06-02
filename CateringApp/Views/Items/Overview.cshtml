@@ -1,0 +1,14 @@
+﻿@model CateringApp.Models.Item
+@{
+    var items = new List<string> { "Item1", "Item22", "Item3" };
+}
+
+<h1>@Model.Name</h1>
+
+<p>This is the name of the item: @Model.Name</p>
+<ul>
+    @foreach(var item in items)
+    {
+        <li>@item</li>
+    }
+</ul>
