@@ -17,5 +17,15 @@
         /// Gets or sets the name of the item.
         /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the description of the item.
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the price of the item.
+        /// </summary>
+        public double Price { get; set; }
     }
 }
