@@ -47,6 +47,36 @@ namespace CateringApp.Controllers
             return View(item);
         }
 
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var item = await _myAppContext.Items.FirstOrDefaultAsync(m => m.Id == id);
+
+            return View(item);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Description, Price")] Item item)
+        {
+            if (id != item.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                _myAppContext.Update(item);
+                await _myAppContext.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(item);
+        }
+
+
         /// <summary>
         /// Placeholder of manual parameter fill.<br/>
         /// </summary>
@@ -55,17 +85,6 @@ namespace CateringApp.Controllers
         {
             var item = new Item() { Name = "Keyboard" };
             return View(item);
-        }
-
-        /// <summary>
-        /// Placeholder of automative parameter fill.<br/>
-        /// Needs to be 'id'.
-        /// </summary>
-        /// <param name="id">Automatic parameter.</param>
-        /// <returns></returns>
-        public IActionResult Edit(int id)
-        {
-            return Content("Id is: " + id);
         }
     }
 }
