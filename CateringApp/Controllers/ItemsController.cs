@@ -1,6 +1,7 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
@@ -27,17 +28,19 @@ namespace CateringApp.Controllers
         {
             var items = await _myAppContext.Items
                 .Include(i => i.SerialNumber)
+                .Include(i => i.Category)
                 .ToListAsync();
             return View(items);
         }
 
         public IActionResult Create()
         {
+            ViewData["Categories"] = new SelectList(_myAppContext.Categories, "Id", "Name");
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Id, Name, Description, Price")] Item item)
+        public async Task<IActionResult> Create([Bind("Id, Name, Description, Price, CategoryId")] Item item)
         {
             if (ModelState.IsValid)
             {
@@ -51,6 +54,8 @@ namespace CateringApp.Controllers
 
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewData["Categories"] = new SelectList(_myAppContext.Categories, "Id", "Name");
+
             if (id == null)
             {
                 return NotFound();
@@ -61,7 +66,7 @@ namespace CateringApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Description, Price")] Item item)
+        public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Description, Price, CategoryId")] Item item)
         {
             if (id != item.Id)
             {

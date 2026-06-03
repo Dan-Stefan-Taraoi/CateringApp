@@ -1,4 +1,6 @@
-﻿namespace CateringApp.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CateringApp.Models
 {
     /// <summary>
     /// This is equivalent to a table in a database.
@@ -31,5 +33,10 @@
         public int? SerialNumberId { get; set; }
 
         public SerialNumber? SerialNumber {  get; set; }
+
+        public int? CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public Category? Category { get; set; }
     }
 }

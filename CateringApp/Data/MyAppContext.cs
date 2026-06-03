@@ -22,11 +22,19 @@ namespace CateringApp.Data
                     new SerialNumber { Id = 1, Name = "PizzaHUBS_09", ItemId = 10 }
                 );
 
+            modelBuilder.Entity<Category>()
+                .HasData(
+                    new Category { Id = 1, Name = "Ingredients" },
+                    new Category { Id = 2, Name = "Dishes" }
+                );
+
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Item> Items { get; set; }
 
         public DbSet<SerialNumber> SerialNumbers { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
     }
 }

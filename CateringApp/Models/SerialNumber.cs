@@ -10,7 +10,7 @@ namespace CateringApp.Models
 
         public int? ItemId { get; set; }
 
-        [ForeignKey(nameof(ItemId))]
+        [ForeignKey("ItemId")]
         public Item? Item { get; set; }
     }
 }
