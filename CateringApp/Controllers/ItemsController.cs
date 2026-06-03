@@ -29,6 +29,24 @@ namespace CateringApp.Controllers
             return View(items);
         }
 
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([Bind("Id, Name, Description, Price")] Item item)
+        {
+            if (ModelState.IsValid)
+            {
+                _myAppContext.Items.Add(item);
+                await _myAppContext.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(item);
+        }
+
         /// <summary>
         /// Placeholder of manual parameter fill.<br/>
         /// </summary>
