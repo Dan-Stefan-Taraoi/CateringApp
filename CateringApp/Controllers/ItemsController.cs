@@ -76,6 +76,28 @@ namespace CateringApp.Controllers
             return View(item);
         }
 
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var item = await _myAppContext.Items.FirstOrDefaultAsync(m => m.Id == id);
+            return View(item);
+        }
+
+        [HttpPost, ActionName(nameof(Delete))]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var item = await _myAppContext.Items.FindAsync(id);
+            if (item != null)
+            {
+                _myAppContext.Items.Remove(item);
+                await _myAppContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
         /// <summary>
         /// Placeholder of manual parameter fill.<br/>
