@@ -25,7 +25,9 @@ namespace CateringApp.Controllers
 
         public async Task<IActionResult > Index()
         {
-            var items = await _myAppContext.Items.ToListAsync();
+            var items = await _myAppContext.Items
+                .Include(i => i.SerialNumber)
+                .ToListAsync();
             return View(items);
         }
 
