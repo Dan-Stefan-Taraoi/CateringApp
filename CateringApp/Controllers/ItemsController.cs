@@ -29,6 +29,8 @@ namespace CateringApp.Controllers
             var items = await _myAppContext.Items
                 .Include(i => i.SerialNumber)
                 .Include(i => i.Category)
+                .Include(i => i.ItemClients)
+                .ThenInclude(ic => ic.Client)
                 .ToListAsync();
             return View(items);
         }

@@ -12,6 +12,19 @@ namespace CateringApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ItemClient>()
+                .HasKey(ic => new { ic.ItemId, ic.ClientId });
+
+            modelBuilder.Entity<ItemClient>()
+                .HasOne(ic => ic.Item)
+                .WithMany(i => i.ItemClients)
+                .HasForeignKey(ic => ic.ItemId);
+
+            modelBuilder.Entity<ItemClient>()
+                .HasOne(ic => ic.Client)
+                .WithMany(c => c.ItemClients)
+                .HasForeignKey(ic => ic.ClientId);
+
             modelBuilder.Entity<Item>()
                 .HasData(
                     new Item { Id = 10, Name = "Pizza", Description = "Delicious cheese pizza", Price = 9.99, SerialNumberId = 1 }
@@ -36,5 +49,9 @@ namespace CateringApp.Data
         public DbSet<SerialNumber> SerialNumbers { get; set; }
 
         public DbSet<Category> Categories { get; set; }
+
+        public DbSet<Client> Clients { get; set; }
+
+        public DbSet<ItemClient> ItemClients { get; set; }
     }
 }
