@@ -1,4 +1,6 @@
-﻿namespace CateringApp.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CateringApp.Models
 {
     /// <summary>
     /// This is equivalent to a table in a database.
@@ -16,6 +18,27 @@
         /// <summary>
         /// Gets or sets the name of the item.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the description of the item.
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the price of the item.
+        /// </summary>
+        public double Price { get; set; }
+
+        public int? SerialNumberId { get; set; }
+
+        public SerialNumber? SerialNumber {  get; set; }
+
+        public int? CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public Category? Category { get; set; }
+
+        public List<ItemClient>? ItemClients { get; set; }
     }
 }

@@ -2,7 +2,30 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-banner">
+    <div class="hero-overlay">
+        <h1>Welcome</h1>
+    </div>
 </div>
+
+<style>
+    .hero-banner {
+        background-image: url('/images/restaurant_example.jpg');
+        background-size: cover;
+        background-position: center;
+        filter: blur(0px); /* the photo itself should be blurry */
+        height: 80vh;
+        position: relative;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+</style>
