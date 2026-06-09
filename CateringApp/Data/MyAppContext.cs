@@ -45,5 +45,7 @@ namespace CateringApp.Data
         public DbSet<ItemClient> ItemClients { get; set; }
 
         public DbSet<MenuItem> MenuItems { get; set; }
+
+        public DbSet<InventoryItem> InventoryItems { get; set; }
     }
 }

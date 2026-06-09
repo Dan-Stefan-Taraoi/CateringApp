@@ -11,7 +11,6 @@
                 <th>Name</th>
                 <th>Description</th>
                 <th>Price</th>
-                <th>Serial Number</th>
                 <th>Category</th>
                 <th>Clients</th>
                 <th></th>
@@ -24,7 +23,6 @@
                     <td>@item.Name</td>
                     <td>@item.Description</td>
                     <td>@item.Price.ToString("N2") €</td>
-                    <td>@(item.SerialNumber?.Name ?? "---")</td>
                     <td>@(item.Category?.Name ?? "---")</td>
                     <td>
                         @if (item.ItemClients != null && item.ItemClients.Any())

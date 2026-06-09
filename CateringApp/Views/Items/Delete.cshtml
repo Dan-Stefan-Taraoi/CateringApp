@@ -25,10 +25,6 @@
             <span>@(Model.Category?.Name ?? "---")</span>
         </div>
         <div class="delete-row">
-            <span class="delete-label">Serial Number</span>
-            <span>@(Model.SerialNumber?.Name ?? "---")</span>
-        </div>
-        <div class="delete-row">
             <span class="delete-label">Clients</span>
             <span>
                 @if (Model.ItemClients != null && Model.ItemClients.Any())

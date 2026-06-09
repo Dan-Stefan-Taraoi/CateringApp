@@ -6,9 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
 {
-
     /// <summary>
-    /// The ItemsController is responsible for handling requests related to items in the catering application.<br/>
+    /// The ItemsController is responsible for handling requests related to items in the catering application.
     /// It provides actions for displaying an overview of items and editing specific items based on their ID.
     /// </summary>
     public class ItemsController : Controller
@@ -16,22 +15,21 @@ namespace CateringApp.Controllers
         private readonly MyAppContext _myAppContext;
 
         /// <summary>
-        /// Initializes a new instance of the ItemsController class with the specified MyAppContext.<br/>
+        /// Initializes a new instance of the ItemsController with the specified MyAppContext.
         /// </summary>
-        /// <param name="myAppContext"></param>
         public ItemsController(MyAppContext myAppContext)
         {
             _myAppContext = myAppContext;
         }
 
-        public async Task<IActionResult > Index()
+        public async Task<IActionResult> Index()
         {
             var items = await _myAppContext.Items
-                .Include(i => i.SerialNumber)
                 .Include(i => i.Category)
                 .Include(i => i.ItemClients!)
-                .ThenInclude(ic => ic.Client)
+                    .ThenInclude(ic => ic.Client)
                 .ToListAsync();
+
             return View(items);
         }
 
@@ -50,19 +48,19 @@ namespace CateringApp.Controllers
                 await _myAppContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
             return View(item);
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
+            if (id == null) return NotFound();
+
             ViewData["Categories"] = new SelectList(_myAppContext.Categories, "Id", "Name");
 
-            if (id == null)
-            {
-                return NotFound();
-            }
-            var item = await _myAppContext.Items.FirstOrDefaultAsync(m => m.Id == id);
+            var item = await _myAppContext.Items
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (item == null) return NotFound();
 
             return View(item);
         }
@@ -70,10 +68,7 @@ namespace CateringApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(int id, [Bind("Id, Name, Description, Price, CategoryId")] Item item)
         {
-            if (id != item.Id)
-            {
-                return NotFound();
-            }
+            if (id != item.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -87,8 +82,9 @@ namespace CateringApp.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
+            if (id == null) return NotFound();
+
             var item = await _myAppContext.Items
-                .Include(i => i.SerialNumber)
                 .Include(i => i.Category)
                 .Include(i => i.ItemClients!)
                     .ThenInclude(ic => ic.Client)
@@ -113,9 +109,8 @@ namespace CateringApp.Controllers
         }
 
         /// <summary>
-        /// Placeholder of manual parameter fill.<br/>
+        /// Placeholder of manual parameter fill.
         /// </summary>
-        /// <returns></returns>
         public IActionResult OverView()
         {
             var item = new Item() { Name = "Keyboard" };
