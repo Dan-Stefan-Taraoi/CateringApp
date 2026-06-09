@@ -29,7 +29,7 @@ namespace CateringApp.Controllers
             var items = await _myAppContext.Items
                 .Include(i => i.SerialNumber)
                 .Include(i => i.Category)
-                .Include(i => i.ItemClients)
+                .Include(i => i.ItemClients!)
                 .ThenInclude(ic => ic.Client)
                 .ToListAsync();
             return View(items);
@@ -87,11 +87,15 @@ namespace CateringApp.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-            var item = await _myAppContext.Items.FirstOrDefaultAsync(m => m.Id == id);
+            var item = await _myAppContext.Items
+                .Include(i => i.SerialNumber)
+                .Include(i => i.Category)
+                .Include(i => i.ItemClients!)
+                    .ThenInclude(ic => ic.Client)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (item == null) return NotFound();
+
             return View(item);
         }
 

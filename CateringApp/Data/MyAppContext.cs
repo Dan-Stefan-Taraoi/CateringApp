@@ -25,16 +25,6 @@ namespace CateringApp.Data
                 .WithMany(c => c.ItemClients)
                 .HasForeignKey(ic => ic.ClientId);
 
-            modelBuilder.Entity<Item>()
-                .HasData(
-                    new Item { Id = 10, Name = "Pizza", Description = "Delicious cheese pizza", Price = 9.99, SerialNumberId = 1 }
-                );
-
-            modelBuilder.Entity<SerialNumber>()
-                .HasData(
-                    new SerialNumber { Id = 1, Name = "PizzaHUBS_09", ItemId = 10 }
-                );
-
             modelBuilder.Entity<Category>()
                 .HasData(
                     new Category { Id = 1, Name = "Ingredients" },
@@ -53,5 +43,7 @@ namespace CateringApp.Data
         public DbSet<Client> Clients { get; set; }
 
         public DbSet<ItemClient> ItemClients { get; set; }
+
+        public DbSet<MenuItem> MenuItems { get; set; }
     }
 }

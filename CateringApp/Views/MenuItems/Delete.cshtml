@@ -1,11 +1,11 @@
-﻿@model CateringApp.Models.Item
+﻿@model CateringApp.Models.MenuItem
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Menu Item";
 }
 
 <div class="delete-container">
-    <h3>Remove Item</h3>
-    <p class="delete-warning">Are you sure you want to delete this item?</p>
+    <h3>Remove from Menu</h3>
+    <p class="delete-warning">Are you sure you want to remove this item from the menu?</p>
 
     <div class="delete-card">
         <div class="delete-row">
@@ -25,30 +25,18 @@
             <span>@(Model.Category?.Name ?? "---")</span>
         </div>
         <div class="delete-row">
-            <span class="delete-label">Serial Number</span>
-            <span>@(Model.SerialNumber?.Name ?? "---")</span>
+            <span class="delete-label">Cooking Method</span>
+            <span>@Model.CookingMethod</span>
         </div>
         <div class="delete-row">
-            <span class="delete-label">Clients</span>
-            <span>
-                @if (Model.ItemClients != null && Model.ItemClients.Any())
-                {
-                    @foreach (var ic in Model.ItemClients)
-                    {
-                        <span class="client-tag">@ic.Client.Name</span>
-                    }
-                }
-                else
-                {
-                    <span class="text-muted">---</span>
-                }
-            </span>
+            <span class="delete-label">Serves</span>
+            <span>@Model.Serves</span>
         </div>
     </div>
 
     <form asp-action="Delete" method="post" class="mt-4">
         <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn-warm btn-warm-danger">Yes, Delete</button>
+        <button type="submit" class="btn-warm btn-warm-danger">Yes, Remove</button>
         <a asp-action="Index" class="btn-warm btn-warm-cancel">Cancel</a>
     </form>
 </div>
@@ -83,7 +71,6 @@
         padding: 0.5rem 0;
         border-bottom: 1px solid #eddfc8;
         color: #3b2410;
-        align-items: flex-start;
     }
 
         .delete-row:last-child {
@@ -94,16 +81,6 @@
         font-weight: 600;
         min-width: 140px;
         color: #5a3010;
-    }
-
-    .client-tag {
-        display: inline-block;
-        background-color: #e8d5b0;
-        color: #3b2410;
-        border-radius: 4px;
-        padding: 2px 8px;
-        font-size: 0.85rem;
-        margin: 2px;
     }
 
     .btn-warm {
