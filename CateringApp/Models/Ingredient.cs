@@ -1,9 +1,7 @@
 ﻿namespace CateringApp.Models
 {
-    public class Ingredient : Item
+    public class Ingredient : InventoryItem
     {
         public string Unit { get; set; } = string.Empty;
-
-        public double Quantity { get; set; }
     }
 }

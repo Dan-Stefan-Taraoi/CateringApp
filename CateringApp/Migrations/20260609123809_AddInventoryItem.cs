@@ -18,16 +18,6 @@ namespace CateringApp.Migrations
                 name: "IX_SerialNumbers_ItemId",
                 table: "SerialNumbers");
 
-            migrationBuilder.DeleteData(
-                table: "SerialNumbers",
-                keyColumn: "Id",
-                keyValue: 1);
-
-            migrationBuilder.DeleteData(
-                table: "Items",
-                keyColumn: "Id",
-                keyValue: 10);
-
             migrationBuilder.RenameColumn(
                 name: "ItemId",
                 table: "SerialNumbers",
@@ -121,16 +111,6 @@ namespace CateringApp.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(13)",
                 oldMaxLength: 13);
-
-            migrationBuilder.InsertData(
-                table: "Items",
-                columns: new[] { "Id", "CategoryId", "Description", "Discriminator", "Name", "Price", "SerialNumberId" },
-                values: new object[] { 10, null, "Delicious cheese pizza", "Item", "Pizza", 9.9900000000000002, 1 });
-
-            migrationBuilder.InsertData(
-                table: "SerialNumbers",
-                columns: new[] { "Id", "ItemId", "Name" },
-                values: new object[] { 1, 10, "PizzaHUBS_09" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_SerialNumbers_ItemId",

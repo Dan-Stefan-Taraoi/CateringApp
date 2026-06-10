@@ -1,0 +1,48 @@
+﻿@model CateringApp.Models.HardwareItem
+@{
+    ViewData["Title"] = "Delete Hardware";
+}
+
+<div class="delete-container">
+    <h3>Remove Hardware Item</h3>
+    <p class="delete-warning">Are you sure you want to delete this hardware item?</p>
+
+    <div class="delete-card">
+        <div class="delete-row">
+            <span class="delete-label">Name</span>
+            <span>@Model.Name</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Description</span>
+            <span>@(Model.Description ?? "---")</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Price</span>
+            <span>@Model.Price.ToString("N2") €</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Category</span>
+            <span>@(Model.Category?.Name ?? "---")</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Quantity</span>
+            <span>@Model.Quantity</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Location</span>
+            <span>@(Model.Location ?? "---")</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Serial Number</span>
+            <span>@(Model.SerialNumber?.Name ?? "---")</span>
+        </div>
+    </div>
+
+    <form asp-action="DeleteHardware" method="post" class="mt-4">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn-warm btn-warm-danger">Yes, Delete</button>
+        <a asp-action="Index" class="btn-warm btn-warm-cancel">Cancel</a>
+    </form>
+</div>
+
+@await Html.PartialAsync("_WarmFormStyles")

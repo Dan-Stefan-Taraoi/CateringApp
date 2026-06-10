@@ -8,7 +8,7 @@ namespace CateringApp.Models
     /// It can be used to store information about the item such as its name, price, description, etc.
     /// It can also be used to create relationships with other models such as orders, categories, etc.
     /// </summary>
-    public class Item
+    public abstract class Item
     {
         /// <summary>
         /// Gets or sets the unique identifier for the item.
