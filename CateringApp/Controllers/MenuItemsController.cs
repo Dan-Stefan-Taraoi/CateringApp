@@ -14,7 +14,7 @@ namespace CateringApp.Controllers
 
         public MenuItemsController(MyAppContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         // GET: MenuItems
