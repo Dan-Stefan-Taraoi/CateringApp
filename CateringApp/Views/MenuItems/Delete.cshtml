@@ -1,0 +1,120 @@
+﻿@model CateringApp.Models.MenuItem
+@{
+    ViewData["Title"] = "Delete Menu Item";
+}
+
+<div class="delete-container">
+    <h3>Remove from Menu</h3>
+    <p class="delete-warning">Are you sure you want to remove this item from the menu?</p>
+
+    <div class="delete-card">
+        <div class="delete-row">
+            <span class="delete-label">Name</span>
+            <span>@Model.Name</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Description</span>
+            <span>@Model.Description</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Price</span>
+            <span>@Model.Price.ToString("N2") €</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Category</span>
+            <span>@(Model.Category?.Name ?? "---")</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Cooking Method</span>
+            <span>@Model.CookingMethod</span>
+        </div>
+        <div class="delete-row">
+            <span class="delete-label">Serves</span>
+            <span>@Model.Serves</span>
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post" class="mt-4">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn-warm btn-warm-danger">Yes, Remove</button>
+        <a asp-action="Index" class="btn-warm btn-warm-cancel">Cancel</a>
+    </form>
+</div>
+
+<style>
+    .delete-container {
+        width: 50%;
+        margin-top: 1.5rem;
+    }
+
+        .delete-container h3 {
+            color: #5a3010;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+    .delete-warning {
+        color: #a0522d;
+        margin-bottom: 1.25rem;
+    }
+
+    .delete-card {
+        background-color: #fdf7f0;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .delete-row {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eddfc8;
+        color: #3b2410;
+    }
+
+        .delete-row:last-child {
+            border-bottom: none;
+        }
+
+    .delete-label {
+        font-weight: 600;
+        min-width: 140px;
+        color: #5a3010;
+    }
+
+    .btn-warm {
+        display: inline-block;
+        padding: 8px 24px;
+        background-color: #a0522d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+        margin-right: 8px;
+    }
+
+        .btn-warm:hover {
+            opacity: 0.85;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .btn-warm-danger {
+        background-color: #8b1a1a;
+    }
+
+    .btn-warm-cancel {
+        background-color: transparent;
+        border: 2px solid #a0522d;
+        color: #a0522d;
+    }
+
+        .btn-warm-cancel:hover {
+            background-color: #a0522d;
+            color: #fff;
+        }
+</style>

@@ -7,11 +7,13 @@ namespace CateringApp.Data
     {
         public MyAppContext(DbContextOptions<MyAppContext> options) : base(options)
         {
-                
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Item>().ToTable("Items");
+
+            // ItemClient composite key
             modelBuilder.Entity<ItemClient>()
                 .HasKey(ic => new { ic.ItemId, ic.ClientId });
 
@@ -25,33 +27,41 @@ namespace CateringApp.Data
                 .WithMany(c => c.ItemClients)
                 .HasForeignKey(ic => ic.ClientId);
 
+            // Explicitly configure TPH hierarchy
             modelBuilder.Entity<Item>()
-                .HasData(
-                    new Item { Id = 10, Name = "Pizza", Description = "Delicious cheese pizza", Price = 9.99, SerialNumberId = 1 }
-                );
+                .HasDiscriminator<string>("Discriminator")
+                .HasValue<MenuItem>("MenuItem")
+                .HasValue<Ingredient>("Ingredient")
+                .HasValue<HardwareItem>("HardwareItem");
 
-            modelBuilder.Entity<SerialNumber>()
-                .HasData(
-                    new SerialNumber { Id = 1, Name = "PizzaHUBS_09", ItemId = 10 }
-                );
+            // SerialNumber → HardwareItem relationship
+            modelBuilder.Entity<HardwareItem>()
+                .HasOne(h => h.SerialNumber)
+                .WithOne(s => s.HardwareItem)
+                .HasForeignKey<SerialNumber>(s => s.HardwareItemId);
 
+            // Seed data
             modelBuilder.Entity<Category>()
                 .HasData(
                     new Category { Id = 1, Name = "Ingredients" },
-                    new Category { Id = 2, Name = "Dishes" }
+                    new Category { Id = 2, Name = "Dishes" },
+                    new Category { Id = 3, Name = "Hardware" }
                 );
 
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Item> Items { get; set; }
+        // Item hierarchy — Item is abstract, no DbSet<Item> needed
+        public DbSet<MenuItem> MenuItems { get; set; }
+        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<HardwareItem> HardwareItems { get; set; }
 
+        public DbSet<InventoryItem> InventoryItems { get; set; }
+
+        // Supporting entities
         public DbSet<SerialNumber> SerialNumbers { get; set; }
-
         public DbSet<Category> Categories { get; set; }
-
         public DbSet<Client> Clients { get; set; }
-
         public DbSet<ItemClient> ItemClients { get; set; }
     }
 }

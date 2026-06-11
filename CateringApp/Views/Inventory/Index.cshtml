@@ -1,0 +1,218 @@
+﻿@model List<CateringApp.Models.InventoryItem>
+@{
+    ViewData["Title"] = "Inventory";
+}
+
+<div class="items-container">
+    <div class="menu-header">
+        <h3>Inventory</h3>
+        <div>
+            <a asp-action="CreateIngredient" class="btn-warm">+ Add Ingredient</a>
+            <a asp-action="CreateHardware" class="btn-warm" style="margin-left: 8px;">+ Add Hardware</a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="empty-note">No inventory items yet.</p>
+    }
+    else
+    {
+        <table class="table items-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Location</th>
+                    <th>Details</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model
+                            .OrderBy(m => m is CateringApp.Models.HardwareItem ? 0 : 1)
+                            .ThenBy(m => m.Name))
+                {
+                    <tr>
+                        <td>
+                            @if (item is CateringApp.Models.Ingredient)
+                            {
+                                <span class="type-badge badge-ingredient">Ingredient</span>
+                            }
+                            else if (item is CateringApp.Models.HardwareItem hw)
+                            {
+                                <span class="type-badge badge-hardware">Hardware</span>
+                            }
+                        </td>
+                        <td>@item.Name</td>
+                        <td>@item.Description</td>
+                        <td>@item.Price.ToString("N2") €</td>
+                        <td>@(item.Category?.Name ?? "---")</td>
+                        <td>@item.Quantity</td>
+                        <td>@(item.Location ?? "---")</td>
+                        <td>
+                            @if (item is CateringApp.Models.Ingredient ing)
+                            {
+                                <span>Unit: @ing.Unit</span>
+                            }
+                            else if (item is CateringApp.Models.HardwareItem hardware)
+                            {
+                                <span>S/N: @(hardware.SerialNumber?.Name ?? "---")</span>
+                            }
+                        </td>
+                        <td class="actions-cell">
+                            @if (item is CateringApp.Models.Ingredient)
+                            {
+                                <a class="btn-action btn-edit"
+                                   asp-action="EditIngredient"
+                                   asp-route-id="@item.Id">Edit</a>
+                                <a class="btn-action btn-delete"
+                                   asp-action="DeleteIngredient"
+                                   asp-route-id="@item.Id">Delete</a>
+                            }
+                            else if (item is CateringApp.Models.HardwareItem)
+                            {
+                                <a class="btn-action btn-edit"
+                                   asp-action="EditHardware"
+                                   asp-route-id="@item.Id">Edit</a>
+                                <a class="btn-action btn-delete"
+                                   asp-action="DeleteHardware"
+                                   asp-route-id="@item.Id">Delete</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .items-container {
+        padding: 1.5rem 0;
+    }
+
+    .menu-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+        .menu-header h3 {
+            color: #5a3010;
+            font-weight: 500;
+            margin: 0;
+        }
+
+    .empty-note {
+        color: #5a3010;
+        opacity: 0.6;
+        font-style: italic;
+    }
+
+    .items-table {
+        background-color: #fdf7f0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e0c9aa;
+    }
+
+        .items-table thead tr {
+            background-color: #e8d5b0;
+        }
+
+        .items-table thead th {
+            color: #3b2410;
+            font-weight: 600;
+            border-bottom: 2px solid #d4b896;
+            padding: 0.85rem 1rem;
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #eddfc8;
+            transition: background-color 0.2s ease;
+        }
+
+            .items-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .items-table tbody tr:hover {
+                background-color: #f5e9d5;
+            }
+
+        .items-table td {
+            color: #3b2410;
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+        }
+
+    .type-badge {
+        display: inline-block;
+        border-radius: 4px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-ingredient {
+        background-color: #d4edda;
+        color: #2d6a3f;
+    }
+
+    .badge-hardware {
+        background-color: #d0e8f5;
+        color: #1a4f6e;
+    }
+
+    .actions-cell {
+        white-space: nowrap;
+    }
+
+    .btn-warm {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #a0522d;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: opacity 0.2s ease;
+    }
+
+        .btn-warm:hover {
+            opacity: 0.85;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .btn-action {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        margin-right: 4px;
+        transition: opacity 0.2s ease;
+    }
+
+        .btn-action:hover {
+            opacity: 0.8;
+            text-decoration: none;
+        }
+
+    .btn-edit {
+        background-color: #c8a96e;
+        color: #fff;
+    }
+
+    .btn-delete {
+        background-color: #a0522d;
+        color: #fff;
+    }
+</style>

@@ -2,30 +2,68 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="hero-banner">
-    <div class="hero-overlay">
-        <h1>Welcome</h1>
+<div class="split-hero">
+
+    <div class="split-panel" style="background-image: url('/images/restaurant_example.jpg')">
+        <div class="split-overlay">
+            <h2>Restaurant</h2>
+            <p>Dine with us in house</p>
+        </div>
     </div>
+
+    <div class="split-panel" style="background-image: url('/images/catering_example.jpg')">
+        <div class="split-overlay">
+            <h2>Catering</h2>
+            <p>We come to your event</p>
+        </div>
+    </div>
+
 </div>
 
 <style>
-    .hero-banner {
-        background-image: url('/images/restaurant_example.jpg');
-        background-size: cover;
-        background-position: center;
-        filter: blur(0px); /* the photo itself should be blurry */
+    .split-hero {
+        display: flex;
         height: 80vh;
-        position: relative;
+        margin: 0 calc(-50vw + 50%);
     }
 
-    .hero-overlay {
+    .split-panel {
+        flex: 1;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        transition: flex 0.5s ease;
+        cursor: pointer;
+    }
+
+        .split-panel:hover {
+            flex: 1.6;
+        }
+
+    .split-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.35);
+        background: none; /* remove the dark tint entirely */
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 3rem;
+        text-align: center;
+        padding: 1rem;
     }
+
+        .split-overlay h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6); /* subtle shadow so text stays readable */
+        }
+
+        .split-overlay p {
+            font-size: 1rem;
+            opacity: 0.95;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+        }
 </style>

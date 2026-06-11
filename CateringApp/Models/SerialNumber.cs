@@ -8,9 +8,8 @@ namespace CateringApp.Models
 
         public string Name { get; set; } = string.Empty;
 
-        public int? ItemId { get; set; }
-
-        [ForeignKey("ItemId")]
-        public Item? Item { get; set; }
+        public int? HardwareItemId { get; set; }
+        [ForeignKey("HardwareItemId")]
+        public HardwareItem? HardwareItem { get; set; }
     }
 }
