@@ -2,7 +2,7 @@
 
 namespace CateringApp.Models
 {
-    public abstract class InventoryItem : Item
+    public class InventoryItem : Item
     {
         public int Quantity { get; set; }
 

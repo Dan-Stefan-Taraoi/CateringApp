@@ -33,7 +33,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @foreach (var item in Model
+                            .OrderBy(m => m is CateringApp.Models.HardwareItem ? 0 : 1)
+                            .ThenBy(m => m.Name))
                 {
                     <tr>
                         <td>
