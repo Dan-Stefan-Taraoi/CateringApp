@@ -12,8 +12,8 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
 
 // Kitchen — always the same
 builder.Services.AddScoped<IKitchenFactory, RestaurantKitchenFactory>();
-builder.Services.AddScoped<IKitchenFactory, CateringKitchenFactory>();
-builder.Services.AddScoped<IDishService, DishService>();
+// builder.Services.AddScoped<IKitchenFactory, CateringKitchenFactory>();
+builder.Services.AddScoped<DishService>();
 
 var app = builder.Build();
 
