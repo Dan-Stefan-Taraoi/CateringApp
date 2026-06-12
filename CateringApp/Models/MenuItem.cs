@@ -2,10 +2,47 @@
 
 namespace CateringApp.Models
 {
-    public class MenuItem : Item
+    /// <summary>
+    /// Represents a menu item, including its identifier, name, description, cooking method, serving size, and
+    /// associated kitchen items.
+    /// </summary>
+    public class MenuItem
     {
+        /// <summary>
+        /// Gets or sets the unique identifier for the menu dish.
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the menu dish.
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the detailed description of the menu dish.
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the cooking method for the menu dish.
+        /// </summary>
         public CookingMethod CookingMethod { get; set; }
 
+        /// <summary>
+        /// Gets or sets the number of servings for the menu dish. This indicates how many people the dish can serve.<br/>
+        /// This information can be useful for customers when ordering, as it helps them understand how much food they will receive and whether it will be sufficient for their needs.
+        /// </summary>
         public int Serves { get; set; } = 1;
+
+        /// <summary>
+        /// Gets or sets the price of the menu dish. This represents the cost that customers will pay for ordering this dish.<br/>
+        /// </summary>
+        public double Price { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of kitchen items (ingredients and tools) that are used to prepare the menu dish.
+        /// This represents the components that make up the dish and can be used to calculate the total cost, nutritional information, and to manage inventory.<br/> 
+        /// </summary>
+        public List<KitchenItem>? KitchenItems{ get; set; }
     }
 }

@@ -12,9 +12,8 @@ namespace CateringApp.Services
         {
             _creators = new()
             {
-                { CookingMethod.Fried, (n, d, p) => new FryDish  { Name = n, Description = d, Price = p } },
-                { CookingMethod.Baked, (n, d, p) => new BakedDish { Name = n, Description = d, Price = p } },
-                { CookingMethod.Cold,  (n, d, p) => new ColdDish  { Name = n, Description = d, Price = p } },
+                { CookingMethod.Fried, (n, d, p) => new CateringDish  {  } },
+                { CookingMethod.Baked, (n, d, p) => new RestaurantDish { } },
             };
         }
 

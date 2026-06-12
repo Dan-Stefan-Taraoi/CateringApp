@@ -14,54 +14,39 @@ namespace CateringApp.Data
             modelBuilder.Entity<Item>().ToTable("Items");
 
             // ItemClient composite key
-            modelBuilder.Entity<ItemClient>()
-                .HasKey(ic => new { ic.ItemId, ic.ClientId });
+            modelBuilder.Entity<KitchenItem>()
+                .HasKey(ic => new { ic.ItemId, ic.MenuItemId });
 
-            modelBuilder.Entity<ItemClient>()
-                .HasOne(ic => ic.Item)
-                .WithMany(i => i.ItemClients)
-                .HasForeignKey(ic => ic.ItemId);
+            modelBuilder.Entity<KitchenItem>()
+                .HasOne(ki => ki.Item)
+                .WithMany(i => i.KitchenItems)
+                .HasForeignKey(ki => ki.ItemId);
 
-            modelBuilder.Entity<ItemClient>()
-                .HasOne(ic => ic.Client)
-                .WithMany(c => c.ItemClients)
-                .HasForeignKey(ic => ic.ClientId);
-
-            // Explicitly configure TPH hierarchy
-            modelBuilder.Entity<Item>()
-                .HasDiscriminator<string>("Discriminator")
-                .HasValue<MenuItem>("MenuItem")
-                .HasValue<Ingredient>("Ingredient")
-                .HasValue<HardwareItem>("HardwareItem");
-
-            // SerialNumber → HardwareItem relationship
-            modelBuilder.Entity<HardwareItem>()
-                .HasOne(h => h.SerialNumber)
-                .WithOne(s => s.HardwareItem)
-                .HasForeignKey<SerialNumber>(s => s.HardwareItemId);
+            modelBuilder.Entity<KitchenItem>()
+                .HasOne(ki => ki.MenuItem)
+                .WithMany(c => c.KitchenItems)
+                .HasForeignKey(ki => ki.MenuItemId);
 
             // Seed data
             modelBuilder.Entity<Category>()
                 .HasData(
                     new Category { Id = 1, Name = "Ingredients" },
-                    new Category { Id = 2, Name = "Dishes" },
-                    new Category { Id = 3, Name = "Hardware" }
+                    new Category { Id = 2, Name = "Equipment" },
+                    new Category { Id = 3, Name = "Maintenance" },
+                    new Category { Id = 4, Name = "Operational" }
                 );
 
             base.OnModelCreating(modelBuilder);
         }
 
-        // Item hierarchy — Item is abstract, no DbSet<Item> needed
+        public DbSet<Item> Items { get; set; }
+
         public DbSet<MenuItem> MenuItems { get; set; }
-        public DbSet<Ingredient> Ingredients { get; set; }
-        public DbSet<HardwareItem> HardwareItems { get; set; }
 
-        public DbSet<InventoryItem> InventoryItems { get; set; }
-
-        // Supporting entities
-        public DbSet<SerialNumber> SerialNumbers { get; set; }
         public DbSet<Category> Categories { get; set; }
+
         public DbSet<Client> Clients { get; set; }
-        public DbSet<ItemClient> ItemClients { get; set; }
+
+        public DbSet<KitchenItem> KitchenItems { get; set; }
     }
 }

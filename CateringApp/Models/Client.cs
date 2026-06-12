@@ -6,6 +6,6 @@
 
         public string Name { get; set; } = string.Empty;
 
-        public List<ItemClient>? ItemClients { get; set; }
+        // public List<ItemClient>? ItemClients { get; set; }
     }
 }
