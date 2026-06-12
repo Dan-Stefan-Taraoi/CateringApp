@@ -1,32 +1,34 @@
 ﻿using CateringApp.Models;
-using CateringApp.Models.Enums;
 using CateringApp.Models.Interfaces;
 
 namespace CateringApp.Services
 {
-    public class DishService
+    public class DishService : IDishService
     {
         private readonly IKitchenFactory _kitchen;
-        private readonly IFulfillmentStrategy _fulfillment;
 
-        public DishService(IKitchenFactory kitchen, IFulfillmentStrategy fulfillment)
+        public DishService(IKitchenFactory kitchenFactory)
         {
-            _kitchen = kitchen ?? throw new ArgumentNullException(nameof(kitchen));
-            _fulfillment = fulfillment ?? throw new ArgumentNullException(nameof(fulfillment));
+            _kitchen = kitchenFactory ?? throw new ArgumentNullException(nameof(kitchenFactory));
         }
 
-        public IDish CreateDish(CookingMethod method, string name, string description, double price)
+        public void PrepareOrder(OrderDetails order)
         {
-            if (!_fulfillment.IsMethodSupported(method))
-                throw new InvalidOperationException(
-                    $"{method} is not supported for {_fulfillment.ServiceType} service");
+            ArgumentNullException.ThrowIfNull(order);
 
-            return _kitchen.CreateDish(method, name, description, price);
+            // Kitchen context determined by injected IKitchenFactory (Restaurant or Catering)
+
+            foreach (var dish in order.Dishes)
+            {
+                dish.Prepare();
+            }
         }
 
-        public OrderDetails PrepareOrder(IEnumerable<IDish> dishes)
+        public IDish CreateDish(MenuItem menuItem)
         {
-            return _fulfillment.PrepareOrder(dishes);
+            ArgumentNullException.ThrowIfNull(menuItem);
+
+            return _kitchen.CreateDish(menuItem);
         }
     }
 }

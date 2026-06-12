@@ -40,6 +40,11 @@ namespace CateringApp.Models
         public double Price { get; set; }
 
         /// <summary>
+        /// Gets or sets the preparation time for the menu dish. This represents the estimated time required to prepare the dish, which can be useful for customers when ordering and for kitchen staff when managing orders and scheduling.<br/>
+        /// </summary>
+        public TimeSpan PreparationTime { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of kitchen items (ingredients and tools) that are used to prepare the menu dish.
         /// This represents the components that make up the dish and can be used to calculate the total cost, nutritional information, and to manage inventory.<br/> 
         /// </summary>

@@ -6,18 +6,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-// Kitchen — always the same
-builder.Services.AddScoped<IKitchenFactory, RestaurantKitchenFactory>();
-
-// Fulfillment — swap based on service context
-builder.Services.AddScoped<IFulfillmentStrategy, RestaurantFulfillment>();
-// or
-builder.Services.AddScoped<IFulfillmentStrategy, CateringFulfillment>();
-
-builder.Services.AddScoped<DishService>();
 
 builder.Services.AddDbContext<MyAppContext>(options => 
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Kitchen — always the same
+builder.Services.AddScoped<IKitchenFactory, RestaurantKitchenFactory>();
+builder.Services.AddScoped<IKitchenFactory, CateringKitchenFactory>();
+builder.Services.AddScoped<IDishService, DishService>();
 
 var app = builder.Build();
 
