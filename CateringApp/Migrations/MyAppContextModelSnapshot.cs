@@ -47,12 +47,17 @@ namespace CateringApp.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "Dishes"
+                            Name = "Equipment"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Hardware"
+                            Name = "Maintenance"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Operational"
                         });
                 });
 
@@ -84,14 +89,8 @@ namespace CateringApp.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -100,33 +99,36 @@ namespace CateringApp.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Item");
-
-                    b.HasDiscriminator().HasValue("Item");
-
-                    b.UseTphMappingStrategy();
+                    b.ToTable("Items", (string)null);
                 });
 
-            modelBuilder.Entity("CateringApp.Models.ItemClient", b =>
+            modelBuilder.Entity("CateringApp.Models.KitchenItem", b =>
                 {
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ClientId")
+                    b.Property<int>("MenuItemId")
                         .HasColumnType("int");
 
-                    b.HasKey("ItemId", "ClientId");
+                    b.HasKey("ItemId", "MenuItemId");
 
-                    b.HasIndex("ClientId");
+                    b.HasIndex("MenuItemId");
 
-                    b.ToTable("ItemClients");
+                    b.ToTable("KitchenItems");
                 });
 
-            modelBuilder.Entity("CateringApp.Models.SerialNumber", b =>
+            modelBuilder.Entity("CateringApp.Models.MenuItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -134,67 +136,29 @@ namespace CateringApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("HardwareItemId")
+                    b.Property<int>("CookingMethod")
                         .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<TimeSpan>("PreparationTime")
+                        .HasColumnType("time");
 
-                    b.HasIndex("HardwareItemId")
-                        .IsUnique()
-                        .HasFilter("[HardwareItemId] IS NOT NULL");
-
-                    b.ToTable("SerialNumbers");
-                });
-
-            modelBuilder.Entity("CateringApp.Models.InventoryItem", b =>
-                {
-                    b.HasBaseType("CateringApp.Models.Item");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasDiscriminator().HasValue("InventoryItem");
-                });
-
-            modelBuilder.Entity("CateringApp.Models.MenuItem", b =>
-                {
-                    b.HasBaseType("CateringApp.Models.Item");
-
-                    b.Property<int>("CookingMethod")
-                        .HasColumnType("int");
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
 
                     b.Property<int>("Serves")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue("MenuItem");
-                });
+                    b.HasKey("Id");
 
-            modelBuilder.Entity("CateringApp.Models.HardwareItem", b =>
-                {
-                    b.HasBaseType("CateringApp.Models.InventoryItem");
-
-                    b.Property<int?>("SerialNumberId")
-                        .HasColumnType("int");
-
-                    b.HasDiscriminator().HasValue("HardwareItem");
-                });
-
-            modelBuilder.Entity("CateringApp.Models.Ingredient", b =>
-                {
-                    b.HasBaseType("CateringApp.Models.InventoryItem");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("Ingredient");
+                    b.ToTable("MenuItems");
                 });
 
             modelBuilder.Entity("CateringApp.Models.Item", b =>
@@ -206,32 +170,23 @@ namespace CateringApp.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("CateringApp.Models.ItemClient", b =>
+            modelBuilder.Entity("CateringApp.Models.KitchenItem", b =>
                 {
-                    b.HasOne("CateringApp.Models.Client", "Client")
-                        .WithMany("ItemClients")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CateringApp.Models.Item", "Item")
-                        .WithMany("ItemClients")
+                        .WithMany("KitchenItems")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Client");
+                    b.HasOne("CateringApp.Models.MenuItem", "MenuItem")
+                        .WithMany("KitchenItems")
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Item");
-                });
 
-            modelBuilder.Entity("CateringApp.Models.SerialNumber", b =>
-                {
-                    b.HasOne("CateringApp.Models.HardwareItem", "HardwareItem")
-                        .WithOne("SerialNumber")
-                        .HasForeignKey("CateringApp.Models.SerialNumber", "HardwareItemId");
-
-                    b.Navigation("HardwareItem");
+                    b.Navigation("MenuItem");
                 });
 
             modelBuilder.Entity("CateringApp.Models.Category", b =>
@@ -239,19 +194,14 @@ namespace CateringApp.Migrations
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("CateringApp.Models.Client", b =>
-                {
-                    b.Navigation("ItemClients");
-                });
-
             modelBuilder.Entity("CateringApp.Models.Item", b =>
                 {
-                    b.Navigation("ItemClients");
+                    b.Navigation("KitchenItems");
                 });
 
-            modelBuilder.Entity("CateringApp.Models.HardwareItem", b =>
+            modelBuilder.Entity("CateringApp.Models.MenuItem", b =>
                 {
-                    b.Navigation("SerialNumber");
+                    b.Navigation("KitchenItems");
                 });
 #pragma warning restore 612, 618
         }

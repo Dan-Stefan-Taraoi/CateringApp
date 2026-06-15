@@ -1,0 +1,250 @@
+﻿@model List<CateringApp.Models.MenuItem>
+@{
+    ViewData["Title"] = "Place Order";
+}
+
+<div class="order-container">
+    <h3>Place Order</h3>
+
+    <form asp-action="Place" method="post">
+
+        @* Service Type *@
+        <div class="order-section">
+            <h5>Service Type</h5>
+            <div class="service-toggle">
+                <label class="service-option">
+                    <input type="radio" name="serviceType" value="Restaurant" checked />
+                    <span>🍽 Restaurant</span>
+                </label>
+                <label class="service-option">
+                    <input type="radio" name="serviceType" value="Catering" />
+                    <span>🚐 Catering</span>
+                </label>
+            </div>
+        </div>
+
+        @* Client *@
+        <div class="order-section">
+            <h5>Client</h5>
+            <select name="clientId" class="form-control warm-input">
+                <option value="">-- Select Client --</option>
+                @foreach (var client in ViewBag.Clients as List<CateringApp.Models.Client>)
+                {
+                    <option value="@client.Id">@client.Name</option>
+                }
+            </select>
+        </div>
+
+        @* Location (Catering only) *@
+        <div class="order-section" id="location-section" style="display:none;">
+            <h5>Event Location</h5>
+            <input type="text" name="location" class="form-control warm-input"
+                   placeholder="e.g. Messe Nürnberg, Halle 4" />
+        </div>
+
+        @* Menu Items *@
+        <div class="order-section">
+            <h5>Menu Items</h5>
+            @if (!Model.Any())
+            {
+                <p class="empty-note">No menu items available.</p>
+            }
+            else
+            {
+                <div class="menu-grid">
+                    @foreach (var item in Model)
+                    {
+                        <label class="menu-card">
+                            <input type="checkbox"
+                                   name="selectedMenuItemIds"
+                                   value="@item.Id" />
+                            <div class="menu-card-body">
+                                <span class="menu-card-name">@item.Name</span>
+                                <span class="menu-card-desc">@item.Description</span>
+                                <div class="menu-card-meta">
+                                    <span>@item.Price.ToString("N2") €</span>
+                                    <span>Serves @item.Serves</span>
+                                    <span class="cooking-badge">@item.CookingMethod</span>
+                                </div>
+                            </div>
+                        </label>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <p class="text-danger mt-2">Please select at least one menu item.</p>
+        }
+
+        <div class="mt-4">
+            <button type="submit" class="btn-warm">Place Order</button>
+            <a asp-action="Index" asp-controller="Home" class="btn-warm btn-warm-cancel">Cancel</a>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    document.querySelectorAll('input[name="serviceType"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            document.getElementById('location-section').style.display =
+                this.value === 'Catering' ? 'block' : 'none';
+        });
+    });
+</script>
+
+<style>
+    .order-container {
+        max-width: 860px;
+        padding: 1.5rem 0;
+    }
+
+    .order-container h3 {
+        color: #5a3010;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .order-section {
+        background-color: #fdf7f0;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .order-section h5 {
+        color: #5a3010;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+
+    .service-toggle {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .service-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border: 1px solid #d4b896;
+        border-radius: 6px;
+        background-color: #fff8f0;
+        color: #3b2410;
+        transition: background-color 0.2s ease;
+    }
+
+    .service-option:has(input:checked) {
+        background-color: #e8d5b0;
+        border-color: #a0522d;
+    }
+
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .menu-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
+        background-color: #fff8f0;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .menu-card:has(input:checked) {
+        background-color: #e8d5b0;
+        border-color: #a0522d;
+    }
+
+    .menu-card input[type="checkbox"] {
+        margin-top: 3px;
+        accent-color: #a0522d;
+    }
+
+    .menu-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .menu-card-name {
+        font-weight: 500;
+        color: #3b2410;
+        font-size: 0.95rem;
+    }
+
+    .menu-card-desc {
+        font-size: 0.82rem;
+        color: #7a5030;
+        opacity: 0.85;
+    }
+
+    .menu-card-meta {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.25rem;
+    }
+
+    .menu-card-meta span {
+        font-size: 0.78rem;
+        color: #5a3010;
+        background-color: #f5e9d5;
+        padding: 1px 6px;
+        border-radius: 4px;
+    }
+
+    .cooking-badge {
+        background-color: #e8d5b0 !important;
+        color: #3b2410 !important;
+    }
+
+    .empty-note {
+        color: #5a3010;
+        opacity: 0.6;
+        font-style: italic;
+    }
+
+    .warm-input {
+        background-color: #fff8f0;
+        border: 1px solid #d4b896;
+        color: #3b2410;
+        border-radius: 6px;
+        width: 100%;
+    }
+
+    .btn-warm {
+        display: inline-block;
+        padding: 8px 24px;
+        background-color: #a0522d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+        margin-right: 8px;
+    }
+
+    .btn-warm:hover { opacity: 0.85; color: #fff; text-decoration: none; }
+
+    .btn-warm-cancel {
+        background-color: transparent;
+        border: 2px solid #a0522d;
+        color: #a0522d;
+    }
+
+    .btn-warm-cancel:hover { background-color: #a0522d; color: #fff; }
+</style>

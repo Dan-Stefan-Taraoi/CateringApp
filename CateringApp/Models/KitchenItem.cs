@@ -1,13 +1,13 @@
 ﻿namespace CateringApp.Models
 {
-    public class ItemClient
+    public class KitchenItem
     {
         public int ItemId { get; set; }
 
         public Item Item { get; set; } = null!;
 
-        public int ClientId { get; set; }
+        public int MenuItemId { get; set; }
 
-        public Client Client { get; set; } = null!;
+        public MenuItem MenuItem { get; set; } = null!;
     }
 }

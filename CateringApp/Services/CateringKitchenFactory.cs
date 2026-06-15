@@ -3,11 +3,11 @@ using CateringApp.Models.Interfaces;
 
 namespace CateringApp.Services
 {
-    public class RestaurantKitchenFactory : IKitchenFactory
+    public class CateringKitchenFactory : IKitchenFactory
     {
         public IDish CreateDish(MenuItem menuItem)
         {
-            var dish = new RestaurantDish() 
+            var dish = new CateringDish
             {
                 PreparationTime = menuItem.PreparationTime
             };

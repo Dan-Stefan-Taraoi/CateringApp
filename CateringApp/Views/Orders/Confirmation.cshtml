@@ -1,0 +1,389 @@
+﻿@using CateringApp.Models
+@model CateringApp.Models.OrderDetails
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<div class="order-container">
+    <h3>Order Confirmed</h3>
+
+    @* Order Summary *@
+    <div class="order-section">
+        <h5>Order Details</h5>
+        <div class="detail-row">
+            <span class="detail-label">Client</span>
+            <span>@Model.Client.Name</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Service Type</span>
+            <span>
+                @if (Model.IsTableService)
+                {
+                    <span class="type-badge badge-restaurant">Restaurant</span>
+                }
+                else
+                {
+                    <span class="type-badge badge-catering">Catering</span>
+                }
+            </span>
+        </div>
+        @if (Model.RequiresTransport)
+        {
+            <div class="detail-row">
+                <span class="detail-label">Transport</span>
+                <span>Required</span>
+            </div>
+        }
+        @if (Model.IsBulkPackaged)
+        {
+            <div class="detail-row">
+                <span class="detail-label">Packaging</span>
+                <span>Bulk packaged</span>
+            </div>
+        }
+    </div>
+
+    @* Kitchen Status *@
+    <div class="order-section">
+        <h5>Kitchen Status</h5>
+        <div id="kitchen-status" class="kitchen-status-bar preparing">
+            <span id="kitchen-label">⏳ Preparing dishes...</span>
+        </div>
+    </div>
+
+    @* Dish Timers *@
+    <div class="order-section">
+        <h5>Dishes</h5>
+        <div id="dish-list">
+            @foreach (var dish in Model.Dishes)
+            {
+                var dishBase = dish as DishBase;
+                var seconds = dishBase != null ? (int)dishBase.PreparationTime.TotalSeconds : 30;
+                var dishType = dish is RestaurantDish ? "Restaurant" : "Catering";
+                var ingredients = dish.GetIngredients();
+
+                <div class="dish-card" data-seconds="@seconds">
+
+                    <div class="dish-card-header">
+                        <div>
+                            @if (dish is RestaurantDish)
+                            {
+                                <span class="type-badge badge-restaurant">Restaurant</span>
+                            }
+                            else
+                            {
+                                <span class="type-badge badge-catering">Catering</span>
+                            }
+                        </div>
+                        <span class="timer-countdown"></span>
+                    </div>
+
+                    <div class="dish-ingredients">
+                        @foreach (var ingredient in ingredients)
+                        {
+                            <span class="ingredient-tag">@ingredient.Name</span>
+                        }
+                    </div>
+
+                    <div class="timer-bar-wrap">
+                        <div class="timer-bar-fill"></div>
+                    </div>
+
+                    <div class="dish-status">
+                        <span class="status-label preparing-label">⏳ Preparing...</span>
+                        <span class="status-label ready-label" style="display:none;">✓ Ready!</span>
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+
+    @* All ready summary — hidden until done *@
+    <div id="all-ready-banner" class="all-ready-banner" style="display:none;">
+        ✓ All dishes are ready!
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Place" class="btn-warm">New Order</a>
+        <a asp-controller="Home" asp-action="Index" class="btn-warm btn-warm-cancel">Home</a>
+    </div>
+</div>
+
+<style>
+    .order-container {
+        max-width: 860px;
+        padding: 1.5rem 0;
+    }
+
+        .order-container h3 {
+            color: #5a3010;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+    .order-section {
+        background-color: #fdf7f0;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+        .order-section h5 {
+            color: #5a3010;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+    .detail-row {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eddfc8;
+        color: #3b2410;
+        align-items: center;
+    }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+    .detail-label {
+        font-weight: 600;
+        min-width: 140px;
+        color: #5a3010;
+    }
+
+    .type-badge {
+        display: inline-block;
+        border-radius: 4px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-restaurant {
+        background-color: #d4edda;
+        color: #2d6a3f;
+    }
+
+    .badge-catering {
+        background-color: #d0e8f5;
+        color: #1a4f6e;
+    }
+
+    /* Kitchen status bar */
+    .kitchen-status-bar {
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+        .kitchen-status-bar.preparing {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .kitchen-status-bar.done {
+            background-color: #d4edda;
+            color: #2d6a3f;
+        }
+
+    /* Dish cards */
+    .dish-card {
+        background-color: #fff8f0;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: border-color 0.4s ease;
+    }
+
+        .dish-card.cooked {
+            border-color: #2d6a3f;
+        }
+
+    .dish-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .timer-countdown {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #a0522d;
+        min-width: 60px;
+        text-align: right;
+    }
+
+    .dish-ingredients {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-bottom: 0.75rem;
+    }
+
+    .ingredient-tag {
+        display: inline-block;
+        background-color: #e8d5b0;
+        color: #3b2410;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+    }
+
+    /* Timer bar */
+    .timer-bar-wrap {
+        height: 8px;
+        background-color: #e0c9aa;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .timer-bar-fill {
+        height: 100%;
+        width: 100%;
+        background-color: #a0522d;
+        border-radius: 4px;
+        transition: width linear, background-color 0.4s ease;
+    }
+
+    .dish-status {
+        font-size: 0.85rem;
+    }
+
+    .preparing-label {
+        color: #856404;
+    }
+
+    .ready-label {
+        color: #2d6a3f;
+        font-weight: 500;
+    }
+
+    /* All ready banner */
+    .all-ready-banner {
+        background-color: #d4edda;
+        color: #2d6a3f;
+        border: 1px solid #b8dcc4;
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .btn-warm {
+        display: inline-block;
+        padding: 8px 24px;
+        background-color: #a0522d;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.2s ease;
+        margin-right: 8px;
+    }
+
+        .btn-warm:hover {
+            opacity: 0.85;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .btn-warm-cancel {
+        background-color: transparent;
+        border: 2px solid #a0522d;
+        color: #a0522d;
+    }
+
+        .btn-warm-cancel:hover {
+            background-color: #a0522d;
+            color: #fff;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const cards = document.querySelectorAll('.dish-card');
+        let finishedCount = 0;
+
+        cards.forEach(card => {
+            const totalSeconds = parseInt(card.dataset.seconds);
+            const fill = card.querySelector('.timer-bar-fill');
+            const countdown = card.querySelector('.timer-countdown');
+            const preparingLabel = card.querySelector('.preparing-label');
+            const readyLabel = card.querySelector('.ready-label');
+
+            let remaining = totalSeconds;
+
+            // Set initial width transition duration
+            fill.style.transitionDuration = totalSeconds + 's';
+
+            // Trigger the bar shrink on next frame
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    fill.style.width = '0%';
+                });
+            });
+
+            // Countdown tick
+            countdown.textContent = formatTime(remaining);
+
+            const interval = setInterval(() => {
+                remaining--;
+                countdown.textContent = remaining > 0
+                    ? formatTime(remaining)
+                    : '';
+
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    markReady(card, fill, preparingLabel, readyLabel, countdown);
+                    finishedCount++;
+
+                    if (finishedCount === cards.length) {
+                        markAllReady();
+                    }
+                }
+            }, 1000);
+        });
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return m > 0
+                ? `${m}m ${s.toString().padStart(2, '0')}s`
+                : `${s}s`;
+        }
+
+        function markReady(card, fill, preparingLabel, readyLabel, countdown) {
+            card.classList.add('cooked');
+            fill.style.backgroundColor = '#2d6a3f';
+            fill.style.width = '100%';
+            fill.style.transitionDuration = '0.4s';
+            preparingLabel.style.display = 'none';
+            readyLabel.style.display = 'inline';
+            countdown.textContent = '';
+        }
+
+        function markAllReady() {
+            const kitchenBar = document.getElementById('kitchen-status');
+            const kitchenLabel = document.getElementById('kitchen-label');
+            kitchenBar.classList.remove('preparing');
+            kitchenBar.classList.add('done');
+            kitchenLabel.textContent = '✓ All dishes ready!';
+
+            document.getElementById('all-ready-banner').style.display = 'block';
+        }
+    });
+</script>

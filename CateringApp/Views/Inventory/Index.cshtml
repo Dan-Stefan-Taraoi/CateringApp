@@ -1,4 +1,4 @@
-﻿@model List<CateringApp.Models.InventoryItem>
+﻿@model Dictionary<string, List<CateringApp.Models.Item>>
 @{
     ViewData["Title"] = "Inventory";
 }
@@ -6,10 +6,7 @@
 <div class="items-container">
     <div class="menu-header">
         <h3>Inventory</h3>
-        <div>
-            <a asp-action="CreateIngredient" class="btn-warm">+ Add Ingredient</a>
-            <a asp-action="CreateHardware" class="btn-warm" style="margin-left: 8px;">+ Add Hardware</a>
-        </div>
+        <a asp-action="Create" class="btn-warm">+ Add Item</a>
     </div>
 
     @if (!Model.Any())
@@ -18,76 +15,51 @@
     }
     else
     {
-        <table class="table items-table">
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th>Location</th>
-                    <th>Details</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model
-                            .OrderBy(m => m is CateringApp.Models.HardwareItem ? 0 : 1)
-                            .ThenBy(m => m.Name))
-                {
+        @foreach (var group in Model)
+        {
+            <h4 class="group-heading">@group.Key</h4>
+            <table class="table items-table mb-4">
+                <thead>
                     <tr>
-                        <td>
-                            @if (item is CateringApp.Models.Ingredient)
-                            {
-                                <span class="type-badge badge-ingredient">Ingredient</span>
-                            }
-                            else if (item is CateringApp.Models.HardwareItem hw)
-                            {
-                                <span class="type-badge badge-hardware">Hardware</span>
-                            }
-                        </td>
-                        <td>@item.Name</td>
-                        <td>@item.Description</td>
-                        <td>@item.Price.ToString("N2") €</td>
-                        <td>@(item.Category?.Name ?? "---")</td>
-                        <td>@item.Quantity</td>
-                        <td>@(item.Location ?? "---")</td>
-                        <td>
-                            @if (item is CateringApp.Models.Ingredient ing)
-                            {
-                                <span>Unit: @ing.Unit</span>
-                            }
-                            else if (item is CateringApp.Models.HardwareItem hardware)
-                            {
-                                <span>S/N: @(hardware.SerialNumber?.Name ?? "---")</span>
-                            }
-                        </td>
-                        <td class="actions-cell">
-                            @if (item is CateringApp.Models.Ingredient)
-                            {
-                                <a class="btn-action btn-edit"
-                                   asp-action="EditIngredient"
-                                   asp-route-id="@item.Id">Edit</a>
-                                <a class="btn-action btn-delete"
-                                   asp-action="DeleteIngredient"
-                                   asp-route-id="@item.Id">Delete</a>
-                            }
-                            else if (item is CateringApp.Models.HardwareItem)
-                            {
-                                <a class="btn-action btn-edit"
-                                   asp-action="EditHardware"
-                                   asp-route-id="@item.Id">Edit</a>
-                                <a class="btn-action btn-delete"
-                                   asp-action="DeleteHardware"
-                                   asp-route-id="@item.Id">Delete</a>
-                            }
-                        </td>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Unit</th>
+                        <th>Available</th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in group.Value)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Price.ToString("N2") €</td>
+                            <td>@item.Quantity</td>
+                            <td>@(item.Unit ?? "---")</td>
+                            <td>
+                                @if (item.IsAvailable)
+                                {
+                                    <span class="availability available">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="availability unavailable">No</span>
+                                }
+                            </td>
+                            <td class="actions-cell">
+                                <a class="btn-action btn-edit"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.Id">Edit</a>
+                                <a class="btn-action btn-delete"
+                                   asp-action="Delete"
+                                   asp-route-id="@item.Id">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     }
 </div>
 
@@ -108,6 +80,15 @@
             font-weight: 500;
             margin: 0;
         }
+
+    .group-heading {
+        color: #5a3010;
+        font-weight: 500;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 2px solid #e0c9aa;
+    }
 
     .empty-note {
         color: #5a3010;
@@ -152,7 +133,7 @@
             vertical-align: middle;
         }
 
-    .type-badge {
+    .availability {
         display: inline-block;
         border-radius: 4px;
         padding: 2px 10px;
@@ -160,14 +141,14 @@
         font-weight: 600;
     }
 
-    .badge-ingredient {
+    .available {
         background-color: #d4edda;
         color: #2d6a3f;
     }
 
-    .badge-hardware {
-        background-color: #d0e8f5;
-        color: #1a4f6e;
+    .unavailable {
+        background-color: #f8d7da;
+        color: #721c24;
     }
 
     .actions-cell {

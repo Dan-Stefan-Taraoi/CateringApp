@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CateringApp.Migrations
 {
     [DbContext(typeof(MyAppContext))]
-    [Migration("20260603115307_one-to-many")]
-    partial class onetomany
+    [Migration("20260612053211_InitialCreateAgain")]
+    partial class InitialCreateAgain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,8 +50,35 @@ namespace CateringApp.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "Dishes"
+                            Name = "Equipment"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Maintenance"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Operational"
                         });
+                });
+
+            modelBuilder.Entity("CateringApp.Models.Client", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("CateringApp.Models.Item", b =>
@@ -65,6 +92,56 @@ namespace CateringApp.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Items", (string)null);
+                });
+
+            modelBuilder.Entity("CateringApp.Models.KitchenItem", b =>
+                {
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MenuItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemId", "MenuItemId");
+
+                    b.HasIndex("MenuItemId");
+
+                    b.ToTable("KitchenItems");
+                });
+
+            modelBuilder.Entity("CateringApp.Models.MenuItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CookingMethod")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -76,56 +153,12 @@ namespace CateringApp.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<int?>("SerialNumberId")
+                    b.Property<int>("Serves")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("Items");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 10,
-                            Description = "Delicious cheese pizza",
-                            Name = "Pizza",
-                            Price = 9.9900000000000002,
-                            SerialNumberId = 1
-                        });
-                });
-
-            modelBuilder.Entity("CateringApp.Models.SerialNumber", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId")
-                        .IsUnique()
-                        .HasFilter("[ItemId] IS NOT NULL");
-
-                    b.ToTable("SerialNumbers");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ItemId = 10,
-                            Name = "PizzaHUBS_09"
-                        });
+                    b.ToTable("MenuItems");
                 });
 
             modelBuilder.Entity("CateringApp.Models.Item", b =>
@@ -137,13 +170,23 @@ namespace CateringApp.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("CateringApp.Models.SerialNumber", b =>
+            modelBuilder.Entity("CateringApp.Models.KitchenItem", b =>
                 {
                     b.HasOne("CateringApp.Models.Item", "Item")
-                        .WithOne("SerialNumber")
-                        .HasForeignKey("CateringApp.Models.SerialNumber", "ItemId");
+                        .WithMany("KitchenItems")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CateringApp.Models.MenuItem", "MenuItem")
+                        .WithMany("KitchenItems")
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Item");
+
+                    b.Navigation("MenuItem");
                 });
 
             modelBuilder.Entity("CateringApp.Models.Category", b =>
@@ -153,7 +196,12 @@ namespace CateringApp.Migrations
 
             modelBuilder.Entity("CateringApp.Models.Item", b =>
                 {
-                    b.Navigation("SerialNumber");
+                    b.Navigation("KitchenItems");
+                });
+
+            modelBuilder.Entity("CateringApp.Models.MenuItem", b =>
+                {
+                    b.Navigation("KitchenItems");
                 });
 #pragma warning restore 612, 618
         }

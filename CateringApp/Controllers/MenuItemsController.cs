@@ -4,7 +4,6 @@ using CateringApp.Models.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace CateringApp.Controllers
 {
@@ -17,37 +16,28 @@ namespace CateringApp.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // GET: MenuItems
+        #region Index
+
         public async Task<IActionResult> Index()
         {
             var menuItems = await _context.MenuItems
-                .Include(m => m.Category)
+                .Include(m => m.KitchenItems!)
+                    .ThenInclude(ki => ki.Item)
                 .ToListAsync();
 
             return View(menuItems);
         }
 
-        // GET: MenuItems/Create
+        #endregion
+
+        #region Create
+
         public IActionResult Create()
         {
-            ViewBag.Categories = _context.Categories
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToList();
-
-            ViewBag.CookingMethods = Enum.GetValues<CookingMethod>()
-                .Select(c => new SelectListItem
-                {
-                    Value = ((int)c).ToString(),
-                    Text = c.ToString()
-                }).ToList();
-
+            PopulateViewData();
             return View();
         }
 
-        // POST: MenuItems/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(MenuItem menuItem)
@@ -59,33 +49,29 @@ namespace CateringApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            PopulateViewData();
             return View(menuItem);
         }
 
-        // GET: MenuItems/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        #endregion
+
+        #region Edit
+
+        public async Task<IActionResult> Edit(int? id)
         {
-            var menuItem = await _context.MenuItems.FindAsync(id);
+            if (id == null) return NotFound();
+
+            var menuItem = await _context.MenuItems
+                .Include(m => m.KitchenItems!)
+                    .ThenInclude(ki => ki.Item)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (menuItem == null) return NotFound();
 
-            ViewBag.Categories = _context.Categories
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToList();
-
-            ViewBag.CookingMethods = Enum.GetValues<CookingMethod>()
-                .Select(c => new SelectListItem
-                {
-                    Value = ((int)c).ToString(),
-                    Text = c.ToString()
-                }).ToList();
-
+            PopulateViewData();
             return View(menuItem);
         }
 
-        // POST: MenuItems/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, MenuItem menuItem)
@@ -99,14 +85,21 @@ namespace CateringApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            PopulateViewData();
             return View(menuItem);
         }
 
-        // GET: MenuItems/Delete/5
-        public async Task<IActionResult> Delete(int id)
+        #endregion
+
+        #region Delete
+
+        public async Task<IActionResult> Delete(int? id)
         {
+            if (id == null) return NotFound();
+
             var menuItem = await _context.MenuItems
-                .Include(m => m.Category)
+                .Include(m => m.KitchenItems!)
+                    .ThenInclude(ki => ki.Item)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (menuItem == null) return NotFound();
@@ -114,19 +107,37 @@ namespace CateringApp.Controllers
             return View(menuItem);
         }
 
-        // POST: MenuItems/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName(nameof(Delete))]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var menuItem = await _context.MenuItems.FindAsync(id);
+            var menuItem = await _context.MenuItems
+                .Include(m => m.KitchenItems!)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (menuItem != null)
             {
+                // Remove KitchenItems first to avoid FK constraint violation
+                if (menuItem.KitchenItems != null)
+                    _context.KitchenItems.RemoveRange(menuItem.KitchenItems);
+
                 _context.MenuItems.Remove(menuItem);
                 await _context.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        #endregion
+
+        private void PopulateViewData()
+        {
+            ViewBag.CookingMethods = Enum.GetValues<CookingMethod>()
+                .Select(c => new SelectListItem
+                {
+                    Value = ((int)c).ToString(),
+                    Text = c.ToString()
+                }).ToList();
         }
     }
 }
