@@ -6,6 +6,15 @@ namespace CateringApp.Models
     {
         public List<Item> Ingredients { get; set; } = [];
 
+        public bool IsDishCooked { get; private set; }
+
+        public TimeSpan PreparationTime { get; set; }
+
+        private void OnCountdownFinished()
+        {
+            IsDishCooked = true;
+        }
+
         public void AddIngredient(Item ingredient)
         {
             Ingredients.Add(ingredient);
@@ -16,9 +25,10 @@ namespace CateringApp.Models
             return Ingredients.AsReadOnly();
         }
 
-        public void Prepare()
+        public async Task PrepareAsync()
         {
-            throw new NotImplementedException();
+            await Task.Delay(PreparationTime);
+            OnCountdownFinished();
         }
 
         public void RemoveIngredient(Item ingredient)

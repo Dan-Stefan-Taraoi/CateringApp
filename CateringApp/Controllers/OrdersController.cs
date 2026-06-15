@@ -87,7 +87,7 @@ namespace CateringApp.Controllers
             };
 
             // Process the order through DishService
-            _dishService.PrepareOrder(order);
+            await _dishService.PrepareOrderAsync(order);
 
             return View("Confirmation", order);
         }

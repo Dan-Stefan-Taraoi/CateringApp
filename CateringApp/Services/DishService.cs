@@ -3,7 +3,7 @@ using CateringApp.Models.Interfaces;
 
 namespace CateringApp.Services
 {
-    public class DishService : IDishService
+    public class DishService
     {
         private readonly IKitchenFactory _kitchen;
 
@@ -12,16 +12,14 @@ namespace CateringApp.Services
             _kitchen = kitchenFactory ?? throw new ArgumentNullException(nameof(kitchenFactory));
         }
 
-        public void PrepareOrder(OrderDetails order)
+        public async Task PrepareOrderAsync(OrderDetails order)
         {
             ArgumentNullException.ThrowIfNull(order);
 
             // Kitchen context determined by injected IKitchenFactory (Restaurant or Catering)
 
-            foreach (var dish in order.Dishes)
-            {
-                dish.Prepare();
-            }
+            var cookingDishes = order.Dishes.Select(order => order.PrepareAsync()).ToList();
+            await Task.WhenAll(cookingDishes);
         }
 
         public IDish CreateDish(MenuItem menuItem)

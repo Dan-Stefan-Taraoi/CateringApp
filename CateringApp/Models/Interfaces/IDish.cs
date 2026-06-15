@@ -8,7 +8,7 @@
 
         public void RemoveIngredient(Item ingredient);
 
-        public void Prepare();
+        public Task PrepareAsync();
 
         public IReadOnlyList<Item> GetIngredients();
     }

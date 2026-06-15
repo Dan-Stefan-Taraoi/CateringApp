@@ -7,7 +7,10 @@ namespace CateringApp.Services
     {
         public IDish CreateDish(MenuItem menuItem)
         {
-            var dish = new RestaurantDish();
+            var dish = new RestaurantDish() 
+            {
+                PreparationTime = menuItem.PreparationTime
+            };
 
             if (menuItem.KitchenItems != null)
             {
