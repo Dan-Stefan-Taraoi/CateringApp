@@ -57,5 +57,11 @@ namespace CateringApp.Models
         /// This represents the components that make up the dish and can be used to calculate the total cost, nutritional information, and to manage inventory.<br/> 
         /// </summary>
         public List<KitchenItem>? KitchenItems{ get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of menu order entries that include this menu item.
+        /// This represents the orders that have been placed for this dish and can be used to track sales, manage inventory, and analyze customer preferences.<br/>
+        /// </summary>
+        public List<MenuOrderEntry>? MenuOrderEntries { get; set; }
     }
 }

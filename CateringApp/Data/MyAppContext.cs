@@ -12,10 +12,11 @@ namespace CateringApp.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Item>().ToTable("Items");
+            modelBuilder.Entity<Order>().ToTable("Orders");
 
-            // ItemClient composite key
+            // Item-to-MenuItem: KitchenItem - composite key
             modelBuilder.Entity<KitchenItem>()
-                .HasKey(ic => new { ic.ItemId, ic.MenuItemId });
+                .HasKey(ki => new { ki.ItemId, ki.MenuItemId });
 
             modelBuilder.Entity<KitchenItem>()
                 .HasOne(ki => ki.Item)
@@ -26,6 +27,17 @@ namespace CateringApp.Data
                 .HasOne(ki => ki.MenuItem)
                 .WithMany(c => c.KitchenItems)
                 .HasForeignKey(ki => ki.MenuItemId);
+
+            // Order-to-MenuItem : MenuOrderEntry relationships — Id is PK, no composite key
+            modelBuilder.Entity<MenuOrderEntry>()
+                .HasOne(moe => moe.Order)
+                .WithMany(o => o.Entries)
+                .HasForeignKey(moe => moe.OrderId);
+
+            modelBuilder.Entity<MenuOrderEntry>()
+                .HasOne(moe => moe.MenuItem)
+                .WithMany(mi => mi.MenuOrderEntries)
+                .HasForeignKey(moe => moe.MenuItemId);
 
             // Seed data
             modelBuilder.Entity<Category>()
@@ -48,5 +60,9 @@ namespace CateringApp.Data
         public DbSet<Client> Clients { get; set; }
 
         public DbSet<KitchenItem> KitchenItems { get; set; }
+
+        public DbSet<Order> Orders { get; set; }
+
+        public DbSet<MenuOrderEntry> MenuOrderEntries { get; set; }
     }
 }

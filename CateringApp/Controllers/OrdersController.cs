@@ -60,23 +60,24 @@ namespace CateringApp.Controllers
                 return await ReloadPlaceView();
             }
 
-            // Load selected MenuItems with their ingredients
+            // 1. Load selected MenuItems with their ingredients
             var menuItems = await _context.MenuItems
                 .Include(m => m.KitchenItems!)
                     .ThenInclude(ki => ki.Item)
                 .Where(m => selectedMenuItemIds.Contains(m.Id))
                 .ToListAsync();
 
+            // 2. Find client
             var client = await _context.Clients.FindAsync(clientId);
             if (client == null) return NotFound();
 
-            // Create dishes via DishService (uses injected factory)
+            // 3. Create dishes via DishService (uses injected factory)
             var dishes = menuItems
                 .Select(m => _dishService.CreateDish(m))
                 .ToList();
 
-            // Build OrderDetails
-            var order = new OrderDetails
+            // 4. Build OrderDetails
+            var orderDetails = new OrderDetails
             {
                 Dishes = dishes,
                 Client = client,
@@ -86,10 +87,34 @@ namespace CateringApp.Controllers
                 RequiresTransport = serviceType == "Catering",
             };
 
-            // Process the order through DishService
-            await _dishService.PrepareOrderAsync(order);
+            // 5. Process the order through DishService
+            await _dishService.PrepareOrderAsync(orderDetails);
 
-            return View("Confirmation", order);
+            // 6. Convert to Order (persistent — DB)
+            var order = new Order
+            {
+                CreatedAt = DateTime.UtcNow,
+                ClientId = clientId,
+                Client = client,
+                ServiceType = serviceType,
+                RequiresTransport = serviceType == "Catering",
+                IsBulkPackaged = serviceType == "Catering",
+                Entries = [.. menuItems.Select(m => new MenuOrderEntry
+                {
+                    MenuItemId = m.Id,
+                    MenuItemName = m.Name,    // snapshot
+                    UnitPrice = m.Price,      // snapshot
+                    Quantity = 1              // for now — later from form input
+                })]
+            };
+
+
+            // 7. Save Order to DB
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            // 8. Pass Order (not OrderDetails) to confirmation view
+            return View("Confirmation", orderDetails);
         }
 
         #endregion

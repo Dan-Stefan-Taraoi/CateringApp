@@ -17,7 +17,6 @@ namespace CateringApp.Services
             ArgumentNullException.ThrowIfNull(order);
 
             // Kitchen context determined by injected IKitchenFactory (Restaurant or Catering)
-
             var cookingDishes = order.Dishes.Select(order => order.PrepareAsync()).ToList();
             await Task.WhenAll(cookingDishes);
         }
