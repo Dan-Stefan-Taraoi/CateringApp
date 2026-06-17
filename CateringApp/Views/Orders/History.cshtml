@@ -18,6 +18,7 @@
         <table class="table items-table">
             <thead>
                 <tr>
+                    <th style="width:32px;"></th>
                     <th>Client</th>
                     <th>Paid</th>
                     <th>Order Date</th>
@@ -29,7 +30,13 @@
             <tbody>
                 @foreach (var order in Model)
                 {
-                    <tr>
+                    var rowId = $"entries-{order.Id}";
+
+                    @* Main order row *@
+                    <tr class="order-row" onclick="toggleEntries('@rowId', this)">
+                        <td>
+                            <span class="expand-icon">▶</span>
+                        </td>
                         <td>@order.Client.Name</td>
                         <td>
                             @if (order.IsPaid)
@@ -53,7 +60,7 @@
                             }
                         </td>
                         <td>@order.Total.ToString("N2") €</td>
-                        <td class="actions-cell">
+                        <td class="actions-cell" onclick="event.stopPropagation()">
                             @if (!order.IsPaid)
                             {
                                 <form asp-action="PayOrder" asp-route-id="@order.Id"
@@ -70,11 +77,59 @@
                             </form>
                         </td>
                     </tr>
+
+                    @* Expandable entries row *@
+                    <tr id="@rowId" class="entries-row" style="display:none;">
+                        <td colspan="7" style="padding: 0;">
+                            <div class="entries-panel">
+                                @if (order.Entries != null && order.Entries.Any())
+                                {
+                                    <table class="entries-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Quantity</th>
+                                                <th>Unit Price</th>
+                                                <th>Line Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var entry in order.Entries)
+                                            {
+                                                <tr>
+                                                    <td>@entry.MenuItemName</td>
+                                                    <td>@entry.Quantity</td>
+                                                    <td>@entry.UnitPrice.ToString("N2") €</td>
+                                                    <td>@entry.TotalPrice.ToString("N2") €</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                                else
+                                {
+                                    <p class="empty-note" style="padding: 0.75rem 1rem;">No items in this order.</p>
+                                }
+                            </div>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
     }
 </div>
+
+<script>
+    function toggleEntries(rowId, clickedRow) {
+        const entriesRow = document.getElementById(rowId);
+        const icon = clickedRow.querySelector('.expand-icon');
+        const isVisible = entriesRow.style.display !== 'none';
+
+        entriesRow.style.display = isVisible ? 'none' : 'table-row';
+        icon.textContent = isVisible ? '▶' : '▼';
+        icon.style.color = isVisible ? '#a0522d' : '#2d6a3f';
+    }
+</script>
 
 <style>
     .history-container {
@@ -119,29 +174,73 @@
             padding: 0.85rem 1rem;
         }
 
-        .items-table tbody tr {
-            border-bottom: 1px solid #eddfc8;
-            transition: background-color 0.2s ease;
+    .order-row {
+        border-bottom: 1px solid #eddfc8;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+    }
+
+        .order-row:hover {
+            background-color: #f5e9d5;
         }
 
-            .items-table tbody tr:last-child {
+    .items-table td {
+        color: #3b2410;
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+    }
+
+    .expand-icon {
+        font-size: 0.75rem;
+        color: #a0522d;
+        transition: color 0.2s ease;
+        user-select: none;
+    }
+
+    /* Entries panel */
+    .entries-row td {
+        padding: 0 !important;
+    }
+
+    .entries-panel {
+        background-color: #f5efe6;
+        border-top: 1px solid #e0c9aa;
+        border-bottom: 1px solid #e0c9aa;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .entries-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+        .entries-table thead tr {
+            background-color: #eddfc8;
+        }
+
+        .entries-table thead th {
+            color: #5a3010;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #d4b896;
+            text-align: left;
+        }
+
+        .entries-table tbody tr {
+            border-bottom: 1px solid #f0e4cc;
+        }
+
+            .entries-table tbody tr:last-child {
                 border-bottom: none;
             }
 
-            .items-table tbody tr:hover {
-                background-color: #f5e9d5;
-            }
-
-        .items-table td {
+        .entries-table td {
             color: #3b2410;
-            padding: 0.75rem 1rem;
-            vertical-align: middle;
+            padding: 0.5rem 0.75rem !important;
         }
 
-    .actions-cell {
-        white-space: nowrap;
-    }
-
+    /* Badges */
     .type-badge {
         display: inline-block;
         border-radius: 4px;
@@ -178,6 +277,10 @@
         padding: 2px 10px;
         font-size: 0.8rem;
         font-weight: 600;
+    }
+
+    .actions-cell {
+        white-space: nowrap;
     }
 
     .btn-warm {

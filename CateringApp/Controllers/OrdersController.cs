@@ -66,9 +66,15 @@ namespace CateringApp.Controllers
             int clientId,
             string? location)
         {
-            if (selectedMenuItemIds == null || !selectedMenuItemIds.Any())
+            if (selectedMenuItemIds == null || selectedMenuItemIds.Count == 0)
             {
                 ModelState.AddModelError("", "Please select at least one menu item.");
+                return await ReloadPlaceView();
+            }
+
+            if (clientId == 0)
+            {
+                ModelState.AddModelError("", "Please select a client.");
                 return await ReloadPlaceView();
             }
 
@@ -133,21 +139,6 @@ namespace CateringApp.Controllers
 
 
         #region Order Payment
-
-        public async Task<IActionResult> PayOrder(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var order = await _context.Orders
-                .Include(o => o.Client)
-                .Include(o => o.Entries)
-                    .ThenInclude(e => e.MenuItem)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (order == null) return NotFound();
-
-            return View(order);
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -27,7 +27,7 @@
         <div class="order-section">
             <h5>Client</h5>
             <select name="clientId" class="form-control warm-input">
-                <option value="">-- Select Client --</option>
+                <option value="0">-- Select Client --</option>
                 @if (ViewBag.Clients is List<CateringApp.Models.Client> clients)
                 {
                     @foreach (var client in clients)
@@ -36,6 +36,11 @@
                     }
                 }
             </select>
+            @if (!ViewData.ModelState.IsValid &&
+                        ViewData.ModelState.ContainsKey("clientId"))
+            {
+                <span class="text-danger">Please select a client.</span>
+            }
         </div>
 
         @* Location (Catering only) *@
