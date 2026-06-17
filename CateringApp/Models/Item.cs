@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CateringApp.Models
 {
@@ -18,21 +19,27 @@ namespace CateringApp.Models
         /// <summary>
         /// Gets or sets the name of the item.
         /// </summary>
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters.")]
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the price of the item per unit. This represents the cost of one unit of the item, which can be used for pricing and billing purposes.<br/>
         /// </summary>
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price cannot be negative.")]
         public double Price { get; set; }
 
         /// <summary>
         /// Gets or sets the stored quantity of the item. This represents how much of the item is currently available in stock or inventory.<br/>
         /// </summary>
+        [Range(0, double.MaxValue, ErrorMessage = "Quantity cannot be negative.")]
         public double Quantity { get; set; }
 
         /// <summary>
         /// Gets or sets the unit of measurement for the item quantity (e.g., grams, liters, pieces).
         /// </summary>
+        [StringLength(20, ErrorMessage = "Unit cannot exceed 20 characters.")]
+        [Display(Name = "Unit of Measure")]
         public string Unit { get; set; } = string.Empty;
 
         public bool IsAvailable { get; set; } = true;

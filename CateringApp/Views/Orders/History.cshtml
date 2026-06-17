@@ -1,0 +1,328 @@
+﻿@model List<CateringApp.Models.Order>
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<div class="history-container">
+    <div class="history-header">
+        <h3>Order History</h3>
+        <a asp-action="Place" class="btn-warm">+ New Order</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="empty-note">No orders yet.</p>
+    }
+    else
+    {
+        <table class="table items-table">
+            <thead>
+                <tr>
+                    <th style="width:32px;"></th>
+                    <th>Client</th>
+                    <th>Paid</th>
+                    <th>Order Date</th>
+                    <th>Service Type</th>
+                    <th>Total Price</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    var rowId = $"entries-{order.Id}";
+
+                    @* Main order row *@
+                    <tr class="order-row" onclick="toggleEntries('@rowId', this)">
+                        <td>
+                            <span class="expand-icon">▶</span>
+                        </td>
+                        <td>@order.Client.Name</td>
+                        <td>
+                            @if (order.IsPaid)
+                            {
+                                <span class="paid-badge">Paid</span>
+                            }
+                            else
+                            {
+                                <span class="unpaid-badge">Unpaid</span>
+                            }
+                        </td>
+                        <td>@order.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>
+                            @if (order.ServiceType == "Restaurant")
+                            {
+                                <span class="type-badge badge-restaurant">Restaurant</span>
+                            }
+                            else
+                            {
+                                <span class="type-badge badge-catering">Catering</span>
+                            }
+                        </td>
+                        <td>@order.Total.ToString("N2") €</td>
+                        <td class="actions-cell" onclick="stopPropagation()">
+                            @if (!order.IsPaid)
+                            {
+                                <form asp-action="PayOrder" asp-route-id="@order.Id"
+                                      method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-action btn-pay">Pay</button>
+                                </form>
+                            }
+                            <form asp-action="DeleteOrder" asp-route-id="@order.Id"
+                                  method="post" style="display:inline;"
+                                  onsubmit="return confirm('Delete this order?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-action btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    @* Expandable entries row *@
+                    <tr id="@rowId" class="entries-row" style="display:none;">
+                        <td colspan="7" style="padding: 0;">
+                            <div class="entries-panel">
+                                @if (order.Entries != null && order.Entries.Any())
+                                {
+                                    <table class="entries-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Quantity</th>
+                                                <th>Unit Price</th>
+                                                <th>Line Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var entry in order.Entries)
+                                            {
+                                                <tr>
+                                                    <td>@entry.MenuItemName</td>
+                                                    <td>@entry.Quantity</td>
+                                                    <td>@entry.UnitPrice.ToString("N2") €</td>
+                                                    <td>@entry.TotalPrice.ToString("N2") €</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                                else
+                                {
+                                    <p class="empty-note" style="padding: 0.75rem 1rem;">No items in this order.</p>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<script>
+    function toggleEntries(rowId, clickedRow) {
+        const entriesRow = document.getElementById(rowId);
+        const icon = clickedRow.querySelector('.expand-icon');
+        const isVisible = entriesRow.style.display !== 'none';
+
+        entriesRow.style.display = isVisible ? 'none' : 'table-row';
+        icon.textContent = isVisible ? '▶' : '▼';
+        icon.style.color = isVisible ? '#a0522d' : '#2d6a3f';
+    }
+</script>
+
+<style>
+    .history-container {
+        padding: 1.5rem 0;
+    }
+
+    .history-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+        .history-header h3 {
+            color: #5a3010;
+            font-weight: 500;
+            margin: 0;
+        }
+
+    .empty-note {
+        color: #5a3010;
+        opacity: 0.6;
+        font-style: italic;
+    }
+
+    .items-table {
+        background-color: #fdf7f0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e0c9aa;
+        width: 100%;
+    }
+
+        .items-table thead tr {
+            background-color: #e8d5b0;
+        }
+
+        .items-table thead th {
+            color: #3b2410;
+            font-weight: 600;
+            border-bottom: 2px solid #d4b896;
+            padding: 0.85rem 1rem;
+        }
+
+    .order-row {
+        border-bottom: 1px solid #eddfc8;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+    }
+
+        .order-row:hover {
+            background-color: #f5e9d5;
+        }
+
+    .items-table td {
+        color: #3b2410;
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+    }
+
+    .expand-icon {
+        font-size: 0.75rem;
+        color: #a0522d;
+        transition: color 0.2s ease;
+        user-select: none;
+    }
+
+    /* Entries panel */
+    .entries-row td {
+        padding: 0 !important;
+    }
+
+    .entries-panel {
+        background-color: #f5efe6;
+        border-top: 1px solid #e0c9aa;
+        border-bottom: 1px solid #e0c9aa;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .entries-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+        .entries-table thead tr {
+            background-color: #eddfc8;
+        }
+
+        .entries-table thead th {
+            color: #5a3010;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #d4b896;
+            text-align: left;
+        }
+
+        .entries-table tbody tr {
+            border-bottom: 1px solid #f0e4cc;
+        }
+
+            .entries-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+        .entries-table td {
+            color: #3b2410;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+    /* Badges */
+    .type-badge {
+        display: inline-block;
+        border-radius: 4px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-restaurant {
+        background-color: #d4edda;
+        color: #2d6a3f;
+    }
+
+    .badge-catering {
+        background-color: #d0e8f5;
+        color: #1a4f6e;
+    }
+
+    .paid-badge {
+        display: inline-block;
+        background-color: #d4edda;
+        color: #2d6a3f;
+        border-radius: 4px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .unpaid-badge {
+        display: inline-block;
+        background-color: #fff3cd;
+        color: #856404;
+        border-radius: 4px;
+        padding: 2px 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .actions-cell {
+        white-space: nowrap;
+    }
+
+    .btn-warm {
+        display: inline-block;
+        padding: 8px 20px;
+        background-color: #a0522d;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: opacity 0.2s ease;
+    }
+
+        .btn-warm:hover {
+            opacity: 0.85;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .btn-action {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        margin-right: 4px;
+        transition: opacity 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-action:hover {
+            opacity: 0.8;
+        }
+
+    .btn-pay {
+        background-color: #4a7fc1;
+        color: #fff;
+    }
+
+    .btn-delete {
+        background-color: #8b1a1a;
+        color: #fff;
+    }
+</style>
