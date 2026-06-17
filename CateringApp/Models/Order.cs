@@ -8,6 +8,8 @@ namespace CateringApp.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public DateTime PaidAt { get; set; } =  DateTime.UtcNow;
+
         public bool IsPaid { get; set; } = false;
 
         public int ClientId { get; set; }

@@ -26,6 +26,18 @@ namespace CateringApp.Controllers
             return View();
         }
 
+        public async Task<IActionResult> History()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.Client)
+                .Include(o => o.Entries)
+                    .ThenInclude(e => e.MenuItem)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
         #endregion
 
         #region Place Order
@@ -118,6 +130,57 @@ namespace CateringApp.Controllers
         }
 
         #endregion
+
+
+        #region Order Payment
+
+        public async Task<IActionResult> PayOrder(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var order = await _context.Orders
+                .Include(o => o.Client)
+                .Include(o => o.Entries)
+                    .ThenInclude(e => e.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null) return NotFound();
+
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PayOrder(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound();
+
+            order.IsPaid = true;
+            order.PaidAt = DateTime.UtcNow;  // if you add this field
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(History));
+        }
+
+        #endregion
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Entries)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order != null)
+            {
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(History));
+        }
 
         #region Helpers
 
