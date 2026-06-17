@@ -60,7 +60,7 @@
                             }
                         </td>
                         <td>@order.Total.ToString("N2") €</td>
-                        <td class="actions-cell" onclick="event.stopPropagation()">
+                        <td class="actions-cell" onclick="stopPropagation()">
                             @if (!order.IsPaid)
                             {
                                 <form asp-action="PayOrder" asp-route-id="@order.Id"
