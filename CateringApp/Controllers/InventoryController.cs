@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
 {
-    [ApiController]
-    [Route("api/Inventory")]
     public class InventoryController : Controller
     {
         private readonly MyAppContext _context;
