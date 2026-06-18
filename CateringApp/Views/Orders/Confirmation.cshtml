@@ -60,7 +60,7 @@
                 var dishBase = dish as DishBase;
                 var seconds = dishBase != null ? (int)dishBase.PreparationTime.TotalSeconds : 30;
                 var dishType = dish is RestaurantDish ? "Restaurant" : "Catering";
-                var ingredients = dish.GetIngredients();
+                var ingredients = dish.GetKitchenItems();
 
                 <div class="dish-card" data-seconds="@seconds">
 
@@ -81,7 +81,7 @@
                     <div class="dish-ingredients">
                         @foreach (var ingredient in ingredients)
                         {
-                            <span class="ingredient-tag">@ingredient.Name</span>
+                            <span class="ingredient-tag">@ingredient.Item.Name</span>
                         }
                     </div>
 

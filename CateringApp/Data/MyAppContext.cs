@@ -32,7 +32,8 @@ namespace CateringApp.Data
             modelBuilder.Entity<MenuOrderEntry>()
                 .HasOne(moe => moe.Order)
                 .WithMany(o => o.Entries)
-                .HasForeignKey(moe => moe.OrderId);
+                .HasForeignKey(moe => moe.OrderId)
+                .OnDelete(DeleteBehavior.Cascade); // cascade delete
 
             modelBuilder.Entity<MenuOrderEntry>()
                 .HasOne(moe => moe.MenuItem)

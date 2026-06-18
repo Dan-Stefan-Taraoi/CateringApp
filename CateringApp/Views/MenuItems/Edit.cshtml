@@ -1,6 +1,10 @@
 ﻿@model CateringApp.Models.MenuItem
 @{
     ViewData["Title"] = "Edit Menu Item";
+    var existing = ViewBag.ExistingKitchenItems as Dictionary<int, double>
+        ?? new Dictionary<int, double>();
+    var availableItems = ViewBag.AvailableItems as List<CateringApp.Models.Item>
+        ?? new List<CateringApp.Models.Item>();
 }
 
 <div class="create-container">
@@ -37,9 +41,59 @@
 
         <div class="form-group mt-2">
             <label asp-for="Serves"></label>
-            <input type="number" asp-for="Serves" class="form-control warm-input" min="1" />
+            <input type="number" asp-for="Serves"
+                   class="form-control warm-input" min="1" />
             <span asp-validation-for="Serves" class="text-danger"></span>
         </div>
+
+        @* Ingredients table *@
+        <table class="table mt-4">
+            <thead>
+                <tr>
+                    <th>Include</th>
+                    <th>Ingredient</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in availableItems
+                                .Where(i => i.Category?.Name == "Ingredients"))
+                {
+                    var isChecked = existing.ContainsKey(item.Id);
+                    var qty = isChecked
+                    ? existing[item.Id].ToString(
+                    System.Globalization.CultureInfo.InvariantCulture)
+                    : "";
+
+                    <tr>
+                        <td>
+                            <input type="checkbox"
+                                   name="selectedItemIds"
+                                   value="@item.Id"
+                                   onchange="toggleQty(this)"
+                                   @(isChecked ? "checked" : "")
+                                   style="accent-color:#a0522d;
+                                              width:16px; height:16px;" />
+                        </td>
+                        <td>
+                            <label style="color:#3b2410; margin:0;">
+                                @item.Name (@item.Unit)
+                            </label>
+                        </td>
+                        <td>
+                            <input type="number"
+                                   name="quantities_@item.Id"
+                                   value="@qty"
+                                   min="0" step="0.01"
+                                   placeholder="0"
+                                   class="form-control warm-input"
+                                   style="width:100px;"
+                                   @(isChecked ? "" : "disabled") />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
         <div class="mt-4">
             <button type="submit" class="btn-warm">Save Changes</button>
@@ -48,74 +102,16 @@
     </form>
 </div>
 
-<style>
-    .create-container {
-        width: 50%;
-        padding: 2rem;
-        background-color: #fdf7f0;
-        border: 1px solid #e0c9aa;
-        border-radius: 8px;
-        margin-top: 1.5rem;
+<script>
+    function toggleQty(checkbox) {
+        const row = checkbox.closest('tr');
+        const qtyInput = row.querySelector('input[type="number"]');
+        qtyInput.disabled = !checkbox.checked;
+        if (!checkbox.checked) qtyInput.value = '';
     }
+</script>
 
-        .create-container h3 {
-            color: #5a3010;
-            margin-bottom: 1.5rem;
-            font-weight: 500;
-        }
-
-        .create-container label {
-            color: #5a3010;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-    .warm-input {
-        background-color: #fff8f0;
-        border: 1px solid #d4b896;
-        color: #3b2410;
-        border-radius: 6px;
-    }
-
-        .warm-input:focus {
-            background-color: #fff8f0;
-            border-color: #a0522d;
-            box-shadow: 0 0 0 0.2rem rgba(160, 82, 45, 0.2);
-            color: #3b2410;
-            outline: none;
-        }
-
-    .btn-warm {
-        display: inline-block;
-        padding: 8px 24px;
-        background-color: #a0522d;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        font-size: 0.95rem;
-        cursor: pointer;
-        text-decoration: none;
-        transition: opacity 0.2s ease;
-        margin-right: 8px;
-    }
-
-        .btn-warm:hover {
-            opacity: 0.85;
-            color: #fff;
-            text-decoration: none;
-        }
-
-    .btn-warm-cancel {
-        background-color: transparent;
-        border: 2px solid #a0522d;
-        color: #a0522d;
-    }
-
-        .btn-warm-cancel:hover {
-            background-color: #a0522d;
-            color: #fff;
-        }
-</style>
+@await Html.PartialAsync("_WarmFormStyles")
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

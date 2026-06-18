@@ -23,7 +23,7 @@ namespace CateringApp.Controllers
         // GET: Orders — active orders overview
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction(nameof(History));
         }
 
         public async Task<IActionResult> History()
@@ -95,6 +95,7 @@ namespace CateringApp.Controllers
                 .ToList();
 
             // 4. Build OrderDetails
+            // TODO: get location and check/adapt inventory to ensure we can fulfill the order
             var orderDetails = new OrderDetails
             {
                 Dishes = dishes,
@@ -120,9 +121,9 @@ namespace CateringApp.Controllers
                 Entries = [.. menuItems.Select(m => new MenuOrderEntry
                 {
                     MenuItemId = m.Id,
-                    MenuItemName = m.Name,    // snapshot
-                    UnitPrice = m.Price,      // snapshot
-                    Quantity = 1              // for now — later from form input
+                    MenuItemName = m.Name,
+                    UnitPrice = m.Price,     
+                    Quantity = 1             
                 })]
             };
 

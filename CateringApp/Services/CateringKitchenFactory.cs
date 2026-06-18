@@ -16,7 +16,7 @@ namespace CateringApp.Services
             {
                 foreach (var kitchenItem in menuItem.KitchenItems)
                 {
-                    dish.AddIngredient(kitchenItem.Item);
+                    dish.AddKitchenItem(kitchenItem);
                 }
             }
 
