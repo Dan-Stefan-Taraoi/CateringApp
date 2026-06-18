@@ -1,11 +1,13 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
 {
+    [Authorize]
     public class InventoryController : Controller
     {
         private readonly MyAppContext _context;

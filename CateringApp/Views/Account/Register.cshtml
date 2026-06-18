@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="create-container">
+    <h3>Register</h3>
+
+    <form asp-action="Register" method="post">
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email"
+                   class="form-control warm-input" />
+        </div>
+        <div class="form-group mt-2">
+            <label>Password</label>
+            <input type="password" name="password"
+                   class="form-control warm-input" />
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="text-danger mt-2">
+                @foreach (var error in ViewData.ModelState.Values
+                            .SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+            </div>
+        }
+
+        <div class="mt-4">
+            <button type="submit" class="btn-warm">Register</button>
+            <a asp-action="Login" class="btn-warm btn-warm-cancel">
+                Back to Login
+            </a>
+        </div>
+    </form>
+</div>
+
+@await Html.PartialAsync("_WarmFormStyles")

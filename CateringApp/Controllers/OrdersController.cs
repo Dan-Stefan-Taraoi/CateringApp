@@ -1,12 +1,13 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
-using CateringApp.Models.Interfaces;
 using CateringApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly MyAppContext _context;
@@ -95,7 +96,6 @@ namespace CateringApp.Controllers
                 .ToList();
 
             // 4. Build OrderDetails
-            // TODO: get location and check/adapt inventory to ensure we can fulfill the order
             var orderDetails = new OrderDetails
             {
                 Dishes = dishes,
