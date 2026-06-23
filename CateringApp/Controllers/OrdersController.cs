@@ -12,11 +12,13 @@ namespace CateringApp.Controllers
     {
         private readonly MyAppContext _context;
         private readonly DishService _dishService;
+        private readonly OrderEventPublisher _publisher;
 
-        public OrdersController(MyAppContext context, DishService dishService)
+        public OrdersController(MyAppContext context, DishService dishService, OrderEventPublisher orderEventPublisher)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dishService = dishService ?? throw new ArgumentNullException(nameof(dishService));
+            _publisher = orderEventPublisher ?? throw new ArgumentNullException(nameof(_publisher));
         }
 
         #region Index
@@ -127,13 +129,15 @@ namespace CateringApp.Controllers
                 })]
             };
 
-
-            // 7. Save Order to DB
+            // 7. Save Order to DB (first save this then fire event/ this acts as an update so the observer may have the updated version)
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
-            // 8. Pass Order (not OrderDetails) to confirmation view
-            return View("Confirmation", orderDetails);
+            // 8. Fire event — observers react
+            await _publisher.PublishAsync(new OrderPlacedEvent(order, dishes));
+
+            // 9. Pass to confirmation
+            return View("Confirmation", order);
         }
 
         #endregion

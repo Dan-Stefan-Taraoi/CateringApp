@@ -1,4 +1,6 @@
 using CateringApp.Data;
+using CateringApp.Models;
+using CateringApp.Models.Interfaces;
 using CateringApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,12 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
 builder.Services.AddScoped<IKitchenFactory, RestaurantKitchenFactory>();
 // builder.Services.AddScoped<IKitchenFactory, CateringKitchenFactory>();
 builder.Services.AddScoped<DishService>();
+
+// Add observer
+builder.Services.AddScoped<IOrderEventObserver, InventoryObserver>();
+builder.Services.AddScoped<IOrderEventObserver, KitchenObserver>();
+builder.Services.AddScoped<IOrderEventObserver, NotificationObserver>();
+builder.Services.AddScoped<OrderEventPublisher>();
 
 // Add Swagger
 builder.Services.AddEndpointsApiExplorer();

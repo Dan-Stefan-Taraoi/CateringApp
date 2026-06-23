@@ -8,12 +8,9 @@ namespace CateringApp.Services
     {
         private readonly IKitchenFactory _kitchen;
 
-        private readonly MyAppContext _context;
-
-        public DishService(IKitchenFactory kitchenFactory, MyAppContext appContext)
+        public DishService(IKitchenFactory kitchenFactory)
         {
             _kitchen = kitchenFactory ?? throw new ArgumentNullException(nameof(kitchenFactory));
-            _context = appContext ?? throw new ArgumentNullException(nameof(appContext));
         }
 
         /// <summary>
@@ -29,21 +26,8 @@ namespace CateringApp.Services
             var cookingTasks = order.Dishes
                 .Select(d => d.PrepareAsync())
                 .ToList();
+
             await Task.WhenAll(cookingTasks);
-
-            // Deduct inventory
-            foreach (var dish in order.Dishes)
-            {
-                foreach (var kitchenItem in dish.GetKitchenItems())
-                {
-                    var inventoryItem = await _context.Items.FindAsync(kitchenItem.ItemId);
-                    if (inventoryItem != null)
-                        inventoryItem.Quantity -= kitchenItem.QuantityRequired;
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
         }
 
         /// <summary>
