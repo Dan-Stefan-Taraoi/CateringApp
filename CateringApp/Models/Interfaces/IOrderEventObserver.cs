@@ -1,4 +1,4 @@
-﻿using CateringApp.Models;
+﻿using CateringApp.Models.Observers;
 
 namespace CateringApp.Models.Interfaces
 {

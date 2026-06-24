@@ -1,5 +1,7 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
+using CateringApp.Models.Builders;
+using CateringApp.Models.Observers;
 using CateringApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +20,7 @@ namespace CateringApp.Controllers
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dishService = dishService ?? throw new ArgumentNullException(nameof(dishService));
-            _publisher = orderEventPublisher ?? throw new ArgumentNullException(nameof(_publisher));
+            _publisher = orderEventPublisher ?? throw new ArgumentNullException(nameof(orderEventPublisher));
         }
 
         #region Index
@@ -98,46 +100,26 @@ namespace CateringApp.Controllers
                 .ToList();
 
             // 4. Build OrderDetails
-            var orderDetails = new OrderDetails
-            {
-                Dishes = dishes,
-                Client = client,
-                ClientId = clientId,
-                IsTableService = serviceType == "Restaurant",
-                IsBulkPackaged = serviceType == "Catering",
-                RequiresTransport = serviceType == "Catering",
-            };
+            OrderDetails orderDetails = new OrderDetailsBuilder()
+                .WithDishes(dishes)
+                .WithClient(client)
+                .WithServiceType(serviceType)
+                .WithLocation(location)
+                .Build();
 
-            // 5. Process the order through DishService
-            await _dishService.PrepareOrderAsync(orderDetails);
+            // 5. Convert to Order (persistent — DB)
+            var order = Order.Create(client, serviceType, menuItems, location);
 
-            // 6. Convert to Order (persistent — DB)
-            var order = new Order
-            {
-                CreatedAt = DateTime.UtcNow,
-                ClientId = clientId,
-                Client = client,
-                ServiceType = serviceType,
-                RequiresTransport = serviceType == "Catering",
-                IsBulkPackaged = serviceType == "Catering",
-                Entries = [.. menuItems.Select(m => new MenuOrderEntry
-                {
-                    MenuItemId = m.Id,
-                    MenuItemName = m.Name,
-                    UnitPrice = m.Price,     
-                    Quantity = 1             
-                })]
-            };
-
-            // 7. Save Order to DB (first save this then fire event/ this acts as an update so the observer may have the updated version)
+            // 7. Save Order to DB (first save this then fire event/ this acts as an update so the observer may have the updated version) and reference it in details
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+            orderDetails.OrderId = order.Id;
 
             // 8. Fire event — observers react
-            await _publisher.PublishAsync(new OrderPlacedEvent(order, dishes));
+            await _publisher.PublishAsync(new OrderPlacedEvent(orderDetails));
 
             // 9. Pass to confirmation
-            return View("Confirmation", order);
+            return View("Confirmation", orderDetails);
         }
 
         #endregion

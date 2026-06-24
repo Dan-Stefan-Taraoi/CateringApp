@@ -15,6 +15,7 @@ namespace CateringApp.Data
         {
             modelBuilder.Entity<Item>().ToTable("Items");
             modelBuilder.Entity<Order>().ToTable("Orders");
+            modelBuilder.Entity<Order>().HasAnnotation("UseConstructor", true);
 
             // Item-to-MenuItem: KitchenItem - composite key
             modelBuilder.Entity<KitchenItem>()

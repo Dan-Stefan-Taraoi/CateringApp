@@ -1,5 +1,5 @@
-﻿using CateringApp.Models;
-using CateringApp.Models.Interfaces;
+﻿using CateringApp.Models.Interfaces;
+using CateringApp.Models.Observers;
 
 namespace CateringApp.Services
 {

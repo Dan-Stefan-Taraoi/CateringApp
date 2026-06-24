@@ -1,6 +1,6 @@
 using CateringApp.Data;
-using CateringApp.Models;
 using CateringApp.Models.Interfaces;
+using CateringApp.Models.Observers;
 using CateringApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +21,7 @@ builder.Services.AddScoped<DishService>();
 builder.Services.AddScoped<IOrderEventObserver, InventoryObserver>();
 builder.Services.AddScoped<IOrderEventObserver, KitchenObserver>();
 builder.Services.AddScoped<IOrderEventObserver, NotificationObserver>();
+builder.Services.AddScoped<IOrderEventObserver, BillingObserver>();
 builder.Services.AddScoped<OrderEventPublisher>();
 
 // Add Swagger

@@ -1,7 +1,7 @@
 ﻿using CateringApp.Models.Interfaces;
 using CateringApp.Services;
 
-namespace CateringApp.Models
+namespace CateringApp.Models.Observers
 {
     public class KitchenObserver : IOrderEventObserver
     {
@@ -12,9 +12,9 @@ namespace CateringApp.Models
             _dishService = dishService ?? throw new ArgumentNullException(nameof(dishService));  
         }
 
-        public Task OnOrderPlacedAsync(OrderPlacedEvent e)
+        public async Task OnOrderPlacedAsync(OrderPlacedEvent e)
         {
-            throw new NotImplementedException();
+            await _dishService.PrepareOrderAsync(e.OrderDetails);
         }
     }
 }

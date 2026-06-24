@@ -1,7 +1,7 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models.Interfaces;
 
-namespace CateringApp.Models
+namespace CateringApp.Models.Observers
 {
     public class InventoryObserver : IOrderEventObserver
     {
@@ -14,7 +14,7 @@ namespace CateringApp.Models
 
         public async Task OnOrderPlacedAsync(OrderPlacedEvent e)
         {
-            foreach (var dish in e.Dishes)
+            foreach (var dish in e.OrderDetails.Dishes)
             {
                 foreach (var kitchenItem in dish.GetKitchenItems())
                 {
