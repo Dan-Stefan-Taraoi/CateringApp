@@ -1,6 +1,7 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
 using CateringApp.Models.Builders;
+using CateringApp.Models.Enums;
 using CateringApp.Models.Observers;
 using CateringApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +38,7 @@ namespace CateringApp.Controllers
                 .Include(o => o.Client)
                 .Include(o => o.Entries)
                     .ThenInclude(e => e.MenuItem)
+                .Include(o => o.PaymentRecord)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
 
@@ -129,15 +131,22 @@ namespace CateringApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PayOrder(int id)
+        public async Task<IActionResult> PayOrder(int id, string paymentMethod)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) return NotFound();
+            var payment = await _context.PaymentRecords
+                .FirstOrDefaultAsync(p => p.OrderId == id);
 
-            order.IsPaid = true;
-            order.PaidAt = DateTime.UtcNow;  // if you add this field
+            if (payment == null) return NotFound();
+
+            payment.IsPaid = true;
+            payment.PaidAt = DateTime.UtcNow;
+            payment.Method = Enum.Parse<PaymentMethod>(paymentMethod);
+            payment.AmountPaid = await _context.Orders
+                .Where(o => o.Id == id)
+                .Select(o => o.Entries.Sum(e => e.UnitPrice * e.Quantity))
+                .FirstOrDefaultAsync();
+
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(History));
         }
 

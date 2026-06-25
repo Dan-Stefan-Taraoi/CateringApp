@@ -18,16 +18,20 @@ namespace CateringApp.Services
         /// </summary>
         /// <param name="order">The whole order details.</param>
         /// <returns></returns>
-        public async Task PrepareOrderAsync(OrderDetails order)
+        public Task PrepareOrderAsync(OrderDetails order)
         {
             ArgumentNullException.ThrowIfNull(order);
 
-            // Cook all dishes concurrently
-            var cookingTasks = order.Dishes
-                .Select(d => d.PrepareAsync())
-                .ToList();
+            // Start cooking in background — don't await
+            _ = Task.WhenAll(order.Dishes
+                .Select(d => d.PrepareAsync()))
+                .ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        Console.WriteLine($"[Kitchen] Error: {t.Exception?.Message}");
+                });
 
-            await Task.WhenAll(cookingTasks);
+            return Task.CompletedTask;
         }
 
         /// <summary>

@@ -31,6 +31,11 @@ namespace CateringApp.Data
                 .WithMany(c => c.KitchenItems)
                 .HasForeignKey(ki => ki.MenuItemId);
 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.PaymentRecord)
+                .WithOne(p => p.Order)
+                .HasForeignKey<PaymentRecord>(p => p.OrderId);
+
             // Order-to-MenuItem : MenuOrderEntry relationships — Id is PK, no composite key
             modelBuilder.Entity<MenuOrderEntry>()
                 .HasOne(moe => moe.Order)
@@ -68,5 +73,7 @@ namespace CateringApp.Data
         public DbSet<Order> Orders { get; set; }
 
         public DbSet<MenuOrderEntry> MenuOrderEntries { get; set; }
+
+        public DbSet<PaymentRecord> PaymentRecords { get; set; }
     }
 }

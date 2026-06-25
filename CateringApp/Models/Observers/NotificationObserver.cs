@@ -9,6 +9,7 @@ namespace CateringApp.Models.Observers
             Console.WriteLine($"[Notification] Order {e.OrderDetails.OrderId} placed " +
                           $"for client {e.OrderDetails.Client.Name} " +
                           $"at {DateTime.UtcNow:HH:mm:ss}");
+
             return Task.CompletedTask;
         }
     }
