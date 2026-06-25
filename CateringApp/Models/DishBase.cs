@@ -4,7 +4,7 @@ namespace CateringApp.Models
 {
     public class DishBase : IDish
     {
-        public List<Item> Ingredients { get; set; } = [];
+        public List<KitchenItem> KitchenItems { get; set; } = [];
 
         public bool IsDishCooked { get; private set; }
 
@@ -15,31 +15,19 @@ namespace CateringApp.Models
             IsDishCooked = true;
         }
 
-        public void AddIngredient(Item ingredient)
+        public void AddKitchenItem(KitchenItem kitchenItem)
         {
-            Ingredients.Add(ingredient);
+            ArgumentNullException.ThrowIfNull(kitchenItem);
+            KitchenItems.Add(kitchenItem);
         }
 
-        public IReadOnlyList<Item> GetIngredients()
-        {
-            return Ingredients.AsReadOnly();
-        }
+        public IReadOnlyList<KitchenItem> GetKitchenItems()
+            => KitchenItems.AsReadOnly();
 
         public async Task PrepareAsync()
         {
             await Task.Delay(PreparationTime);
             OnCountdownFinished();
-        }
-
-        public void RemoveIngredient(Item ingredient)
-        {
-            ArgumentNullException.ThrowIfNull(ingredient);
-
-            var foundIngredient = Ingredients.FirstOrDefault(i => i.Id == ingredient.Id);
-            if (foundIngredient != null)
-            {
-                Ingredients.Remove(foundIngredient);
-            }
         }
     }
 }

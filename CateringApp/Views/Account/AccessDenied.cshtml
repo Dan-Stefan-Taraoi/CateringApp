@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="create-container">
+    <h3>Access Denied</h3>
+    <p style="color:#5a3010;">
+        You don't have permission to view this page.
+    </p>
+    <a asp-controller="Home" asp-action="Index" class="btn-warm">
+        Go Home
+    </a>
+</div>
+
+@await Html.PartialAsync("_WarmFormStyles")

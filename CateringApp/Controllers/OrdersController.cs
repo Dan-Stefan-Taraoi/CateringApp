@@ -1,21 +1,27 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
-using CateringApp.Models.Interfaces;
+using CateringApp.Models.Builders;
+using CateringApp.Models.Enums;
+using CateringApp.Models.Observers;
 using CateringApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly MyAppContext _context;
         private readonly DishService _dishService;
+        private readonly OrderEventPublisher _publisher;
 
-        public OrdersController(MyAppContext context, DishService dishService)
+        public OrdersController(MyAppContext context, DishService dishService, OrderEventPublisher orderEventPublisher)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _dishService = dishService ?? throw new ArgumentNullException(nameof(dishService));
+            _publisher = orderEventPublisher ?? throw new ArgumentNullException(nameof(orderEventPublisher));
         }
 
         #region Index
@@ -23,7 +29,7 @@ namespace CateringApp.Controllers
         // GET: Orders — active orders overview
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction(nameof(History));
         }
 
         public async Task<IActionResult> History()
@@ -32,6 +38,7 @@ namespace CateringApp.Controllers
                 .Include(o => o.Client)
                 .Include(o => o.Entries)
                     .ThenInclude(e => e.MenuItem)
+                .Include(o => o.PaymentRecord)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
 
@@ -95,43 +102,25 @@ namespace CateringApp.Controllers
                 .ToList();
 
             // 4. Build OrderDetails
-            var orderDetails = new OrderDetails
-            {
-                Dishes = dishes,
-                Client = client,
-                ClientId = clientId,
-                IsTableService = serviceType == "Restaurant",
-                IsBulkPackaged = serviceType == "Catering",
-                RequiresTransport = serviceType == "Catering",
-            };
+            OrderDetails orderDetails = new OrderDetailsBuilder()
+                .WithDishes(dishes)
+                .WithClient(client)
+                .WithServiceType(serviceType)
+                .WithLocation(location)
+                .Build();
 
-            // 5. Process the order through DishService
-            await _dishService.PrepareOrderAsync(orderDetails);
+            // 5. Convert to Order (persistent — DB)
+            var order = Order.Create(client, serviceType, menuItems, location);
 
-            // 6. Convert to Order (persistent — DB)
-            var order = new Order
-            {
-                CreatedAt = DateTime.UtcNow,
-                ClientId = clientId,
-                Client = client,
-                ServiceType = serviceType,
-                RequiresTransport = serviceType == "Catering",
-                IsBulkPackaged = serviceType == "Catering",
-                Entries = [.. menuItems.Select(m => new MenuOrderEntry
-                {
-                    MenuItemId = m.Id,
-                    MenuItemName = m.Name,    // snapshot
-                    UnitPrice = m.Price,      // snapshot
-                    Quantity = 1              // for now — later from form input
-                })]
-            };
-
-
-            // 7. Save Order to DB
+            // 7. Save Order to DB (first save this then fire event/ this acts as an update so the observer may have the updated version) and reference it in details
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+            orderDetails.OrderId = order.Id;
 
-            // 8. Pass Order (not OrderDetails) to confirmation view
+            // 8. Fire event — observers react
+            await _publisher.PublishAsync(new OrderPlacedEvent(orderDetails));
+
+            // 9. Pass to confirmation
             return View("Confirmation", orderDetails);
         }
 
@@ -142,15 +131,22 @@ namespace CateringApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PayOrder(int id)
+        public async Task<IActionResult> PayOrder(int id, string paymentMethod)
         {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) return NotFound();
+            var payment = await _context.PaymentRecords
+                .FirstOrDefaultAsync(p => p.OrderId == id);
 
-            order.IsPaid = true;
-            order.PaidAt = DateTime.UtcNow;  // if you add this field
+            if (payment == null) return NotFound();
+
+            payment.IsPaid = true;
+            payment.PaidAt = DateTime.UtcNow;
+            payment.Method = Enum.Parse<PaymentMethod>(paymentMethod);
+            payment.AmountPaid = await _context.Orders
+                .Where(o => o.Id == id)
+                .Select(o => o.Entries.Sum(e => e.UnitPrice * e.Quantity))
+                .FirstOrDefaultAsync();
+
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(History));
         }
 

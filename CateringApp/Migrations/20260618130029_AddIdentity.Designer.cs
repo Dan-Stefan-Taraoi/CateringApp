@@ -4,6 +4,7 @@ using CateringApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CateringApp.Migrations
 {
     [DbContext(typeof(MyAppContext))]
-    partial class MyAppContextModelSnapshot : ModelSnapshot
+    [Migration("20260618130029_AddIdentity")]
+    partial class AddIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,8 +222,11 @@ namespace CateringApp.Migrations
                     b.Property<bool>("IsBulkPackaged")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Location")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("RequiresTransport")
                         .HasColumnType("bit");
@@ -234,42 +240,6 @@ namespace CateringApp.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("Orders", (string)null);
-
-                    b.HasAnnotation("UseConstructor", true);
-                });
-
-            modelBuilder.Entity("CateringApp.Models.PaymentRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("AmountPaid")
-                        .HasColumnType("float");
-
-                    b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Method")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
-                    b.ToTable("PaymentRecords");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -526,17 +496,6 @@ namespace CateringApp.Migrations
                     b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("CateringApp.Models.PaymentRecord", b =>
-                {
-                    b.HasOne("CateringApp.Models.Order", "Order")
-                        .WithOne("PaymentRecord")
-                        .HasForeignKey("CateringApp.Models.PaymentRecord", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -608,8 +567,6 @@ namespace CateringApp.Migrations
             modelBuilder.Entity("CateringApp.Models.Order", b =>
                 {
                     b.Navigation("Entries");
-
-                    b.Navigation("PaymentRecord");
                 });
 #pragma warning restore 612, 618
         }

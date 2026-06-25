@@ -1,9 +1,11 @@
 ﻿using CateringApp.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Data
 {
-    public class MyAppContext : DbContext
+    public class MyAppContext : IdentityDbContext<IdentityUser>
     {
         public MyAppContext(DbContextOptions<MyAppContext> options) : base(options)
         {
@@ -13,6 +15,7 @@ namespace CateringApp.Data
         {
             modelBuilder.Entity<Item>().ToTable("Items");
             modelBuilder.Entity<Order>().ToTable("Orders");
+            modelBuilder.Entity<Order>().HasAnnotation("UseConstructor", true);
 
             // Item-to-MenuItem: KitchenItem - composite key
             modelBuilder.Entity<KitchenItem>()
@@ -28,11 +31,17 @@ namespace CateringApp.Data
                 .WithMany(c => c.KitchenItems)
                 .HasForeignKey(ki => ki.MenuItemId);
 
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.PaymentRecord)
+                .WithOne(p => p.Order)
+                .HasForeignKey<PaymentRecord>(p => p.OrderId);
+
             // Order-to-MenuItem : MenuOrderEntry relationships — Id is PK, no composite key
             modelBuilder.Entity<MenuOrderEntry>()
                 .HasOne(moe => moe.Order)
                 .WithMany(o => o.Entries)
-                .HasForeignKey(moe => moe.OrderId);
+                .HasForeignKey(moe => moe.OrderId)
+                .OnDelete(DeleteBehavior.Cascade); // cascade delete
 
             modelBuilder.Entity<MenuOrderEntry>()
                 .HasOne(moe => moe.MenuItem)
@@ -64,5 +73,7 @@ namespace CateringApp.Data
         public DbSet<Order> Orders { get; set; }
 
         public DbSet<MenuOrderEntry> MenuOrderEntries { get; set; }
+
+        public DbSet<PaymentRecord> PaymentRecords { get; set; }
     }
 }

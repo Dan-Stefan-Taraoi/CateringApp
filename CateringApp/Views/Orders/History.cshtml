@@ -60,18 +60,31 @@
                             }
                         </td>
                         <td>@order.Total.ToString("N2") €</td>
-                        <td class="actions-cell" onclick="stopPropagation()">
+                        <td class="actions-cell">
                             @if (!order.IsPaid)
                             {
                                 <form asp-action="PayOrder" asp-route-id="@order.Id"
-                                      method="post" style="display:inline;">
+                                      method="post"
+                                      style="display:inline;"
+                                      onsubmit="event.stopPropagation()">
                                     @Html.AntiForgeryToken()
+                                    <select name="paymentMethod"
+                                            class="form-control warm-input"
+                                            style="width:120px; display:inline-block; padding:3px 6px;"
+                                            onclick="event.stopPropagation()">
+                                        <option value="Cash">Cash</option>
+                                        <option value="Card">Card</option>
+                                        <option value="BankTransfer">Bank Transfer</option>
+                                        <option value="Invoice">Invoice</option>
+                                    </select>
                                     <button type="submit" class="btn-action btn-pay">Pay</button>
                                 </form>
                             }
+
                             <form asp-action="DeleteOrder" asp-route-id="@order.Id"
-                                  method="post" style="display:inline;"
-                                  onsubmit="return confirm('Delete this order?');">
+                                  method="post"
+                                  style="display:inline;"
+                                  onsubmit="event.stopPropagation(); return confirm('Delete this order?');">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-action btn-delete">Delete</button>
                             </form>
@@ -110,6 +123,16 @@
                                 {
                                     <p class="empty-note" style="padding: 0.75rem 1rem;">No items in this order.</p>
                                 }
+
+                                @if (order.PaymentRecord != null)
+                                {
+                                    <div class="payment-info">
+                                        <span class="delete-label">Payment</span>
+                                        <span>@order.PaymentRecord.Method</span>
+                                        <span style="margin-left:1rem;">@order.PaymentRecord.PaidAt?.ToString("dd.MM.yyyy HH:mm")</span>
+                                        <span style="margin-left:1rem;">@order.PaymentRecord.AmountPaid.ToString("N2") €</span>
+                                    </div>
+                                }
                             </div>
                         </td>
                     </tr>
@@ -129,6 +152,9 @@
         icon.textContent = isVisible ? '▶' : '▼';
         icon.style.color = isVisible ? '#a0522d' : '#2d6a3f';
     }
+        document.querySelectorAll('.actions-cell').forEach(cell => {
+        cell.addEventListener('click', e => e.stopPropagation());
+    });
 </script>
 
 <style>
@@ -325,4 +351,16 @@
         background-color: #8b1a1a;
         color: #fff;
     }
+
+    .payment-info {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem 0;
+        color: #3b2410;
+        font-size: 0.88rem;
+        border-top: 1px solid #e0c9aa;
+        margin-top: 0.5rem;
+    }
+
 </style>

@@ -8,9 +8,7 @@ namespace CateringApp.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public DateTime PaidAt { get; set; } =  DateTime.UtcNow;
-
-        public bool IsPaid { get; set; } = false;
+        public string? Location { get; set; }
 
         public int ClientId { get; set; }
 
@@ -18,6 +16,8 @@ namespace CateringApp.Models
 
         [Required]
         public string ServiceType { get; set; } = string.Empty;
+
+        public PaymentRecord? PaymentRecord { get; set; }
 
         public bool RequiresTransport { get; set; }
 
@@ -27,5 +27,35 @@ namespace CateringApp.Models
 
         // Computed — not stored in DB
         public double Total => Entries.Sum(e => e.TotalPrice);
+
+        public bool IsPaid => PaymentRecord?.IsPaid ?? false;
+
+        // Protected constructor — forces factory method usage
+        protected Order() { }
+
+        public static Order Create(
+            Client client,
+            string serviceType,
+            List<MenuItem> menuItems,
+            string? location = null)
+        {
+            return new Order
+            {
+                CreatedAt = DateTime.UtcNow,
+                ClientId = client.Id,
+                Client = client,
+                ServiceType = serviceType,
+                RequiresTransport = serviceType == "Catering",
+                IsBulkPackaged = serviceType == "Catering",
+                Location = location,
+                Entries = [.. menuItems.Select(m => new MenuOrderEntry
+                {
+                    MenuItemId = m.Id,
+                    MenuItemName = m.Name,
+                    UnitPrice = m.Price,
+                    Quantity = 1
+                })]
+            };
+        }
     }
 }

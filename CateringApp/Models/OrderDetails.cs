@@ -5,6 +5,7 @@ namespace CateringApp.Models
 {
     public class OrderDetails
     {
+        public int OrderId { get; set; }
         public IEnumerable<IDish> Dishes { get; set; } = [];
 
         public int ClientId { get; set; }

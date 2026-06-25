@@ -2,14 +2,9 @@
 {
     public interface IDish
     {
-        public List<Item> Ingredients { get; set; }
-
-        public void AddIngredient(Item ingredient);
-
-        public void RemoveIngredient(Item ingredient);
-
-        public Task PrepareAsync();
-
-        public IReadOnlyList<Item> GetIngredients();
+        List<KitchenItem> KitchenItems { get; set; }
+        void AddKitchenItem(KitchenItem kitchenItem);
+        IReadOnlyList<KitchenItem> GetKitchenItems();
+        Task PrepareAsync();
     }
 }

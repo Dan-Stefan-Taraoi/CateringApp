@@ -1,12 +1,14 @@
 ﻿using CateringApp.Data;
 using CateringApp.Models;
 using CateringApp.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CateringApp.Controllers
 {
+    [Authorize]
     public class MenuItemsController : Controller
     {
         private readonly MyAppContext _context;
@@ -32,19 +34,53 @@ namespace CateringApp.Controllers
 
         #region Create
 
-        public IActionResult Create()
+        // GET : MenuItems/Create
+        public async Task<IActionResult> Create()
         {
             PopulateViewData();
+
+            // Pass all inventory items so staff can pick ingredients
+            ViewBag.AvailableItems = await _context.Items
+                .Include(i => i.Category)
+                .OrderBy(i => i.Name)
+                .ToListAsync();
+
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(MenuItem menuItem)
+        public async Task<IActionResult> Create(
+            MenuItem menuItem,
+            List<int> selectedItemIds,
+            IFormCollection form)
         {
             if (ModelState.IsValid)
             {
                 _context.MenuItems.Add(menuItem);
+                await _context.SaveChangesAsync();
+
+                // Save KitchenItems
+                foreach (var itemId in selectedItemIds)
+                {
+                    var qtyKey = $"quantities_{itemId}";
+                    var qty = double.TryParse(
+                        form[qtyKey],
+                        System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out var parsed) ? parsed : 0;
+
+                    if (qty > 0)
+                    {
+                        _context.KitchenItems.Add(new KitchenItem
+                        {
+                            MenuItemId = menuItem.Id,
+                            ItemId = itemId,
+                            QuantityRequired = qty
+                        });
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -68,19 +104,59 @@ namespace CateringApp.Controllers
 
             if (menuItem == null) return NotFound();
 
+            ViewBag.AvailableItems = await _context.Items
+                .Include(i => i.Category)
+                .OrderBy(i => i.Name)
+                .ToListAsync();
+
+            // Pass existing quantities so the form can pre-fill them
+            ViewBag.ExistingKitchenItems = menuItem.KitchenItems?
+                .ToDictionary(ki => ki.ItemId, ki => ki.QuantityRequired)
+                ?? new Dictionary<int, double>();
+
             PopulateViewData();
             return View(menuItem);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, MenuItem menuItem)
+        public async Task<IActionResult> Edit(
+            int id,
+            MenuItem menuItem,
+            List<int> selectedItemIds,
+            IFormCollection form)
         {
             if (id != menuItem.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
                 _context.Update(menuItem);
+
+                // Remove existing KitchenItems and replace
+                var existing = _context.KitchenItems
+                    .Where(ki => ki.MenuItemId == id);
+                _context.KitchenItems.RemoveRange(existing);
+
+                foreach (var itemId in selectedItemIds)
+                {
+                    var qtyKey = $"quantities_{itemId}";
+                    var qty = double.TryParse(
+                        form[qtyKey],
+                        System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        out var parsed) ? parsed : 0;
+
+                    if (qty > 0)
+                    {
+                        _context.KitchenItems.Add(new KitchenItem
+                        {
+                            MenuItemId = menuItem.Id,
+                            ItemId = itemId,
+                            QuantityRequired = qty
+                        });
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
