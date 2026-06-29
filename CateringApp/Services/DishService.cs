@@ -6,11 +6,11 @@ namespace CateringApp.Services
 {
     public class DishService
     {
-        private readonly IKitchenFactory _kitchen;
+        private readonly KitchenFactoryResolver _resolver;
 
-        public DishService(IKitchenFactory kitchenFactory)
+        public DishService(KitchenFactoryResolver resolver)
         {
-            _kitchen = kitchenFactory ?? throw new ArgumentNullException(nameof(kitchenFactory));
+            _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
         }
 
         /// <summary>
@@ -23,13 +23,15 @@ namespace CateringApp.Services
             ArgumentNullException.ThrowIfNull(order);
 
             // Start cooking in background — don't await
-            _ = Task.WhenAll(order.Dishes
-                .Select(d => d.PrepareAsync()))
-                .ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                        Console.WriteLine($"[Kitchen] Error: {t.Exception?.Message}");
-                });
+            var cookingTasks = order.Dishes
+            .Select(d => d.PrepareAsync())
+            .ToList();
+
+            _ = Task.WhenAll(cookingTasks).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    Console.WriteLine($"[Kitchen] Error: {t.Exception?.Message}");
+            });
 
             return Task.CompletedTask;
         }
@@ -39,11 +41,13 @@ namespace CateringApp.Services
         /// </summary>
         /// <param name="menuItem">The menu item that is also available in the UI.</param>
         /// <returns></returns>
-        public IDish CreateDish(MenuItem menuItem)
+        public IDish CreateDish(MenuItem menuItem, string serviceType, string? location = null)
         {
             ArgumentNullException.ThrowIfNull(menuItem);
+            ArgumentException.ThrowIfNullOrWhiteSpace(serviceType);
 
-            return _kitchen.CreateDish(menuItem);
+            var factory = _resolver.GetFactory(serviceType);
+            return factory.CreateDish(menuItem, location);
         }
     }
 }
