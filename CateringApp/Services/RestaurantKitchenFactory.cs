@@ -5,7 +5,7 @@ namespace CateringApp.Services
 {
     public class RestaurantKitchenFactory : IKitchenFactory
     {
-        public IDish CreateDish(MenuItem menuItem)
+        public IDish CreateDish(MenuItem menuItem, string? location = null)
         {
             var dish = new RestaurantDish
             {

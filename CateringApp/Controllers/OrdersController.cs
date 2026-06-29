@@ -98,7 +98,7 @@ namespace CateringApp.Controllers
 
             // 3. Create dishes via DishService (uses injected factory)
             var dishes = menuItems
-                .Select(m => _dishService.CreateDish(m))
+                .Select(m => _dishService.CreateDish(m, serviceType, location))
                 .ToList();
 
             // 4. Build OrderDetails

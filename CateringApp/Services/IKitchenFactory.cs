@@ -5,6 +5,6 @@ namespace CateringApp.Services
 {
     public interface IKitchenFactory
     {
-        public IDish CreateDish(MenuItem menuItem);
+        IDish CreateDish(MenuItem menuItem, string? location = null);
     }
 }
