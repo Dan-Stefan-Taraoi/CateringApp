@@ -1,0 +1,106 @@
+﻿@model List<CateringApp.Models.ViewModels.TableStatusViewModel>
+@{
+    ViewData["Title"] = "Service Map";
+}
+
+<body>
+   <div class="service-map-container">
+        <div class="grid-left-section">
+            <h3>Tables Map</h3>
+            <div class="grid-content">
+                @if (!Model.Any())
+                {
+                    <p class="empty-note">No client items yet.</p>
+                }
+                else
+                {
+                    <div class="tables-grid">
+                        @foreach (var vm in Model.Where(model => model.Client.Address == "Local"))
+                        {
+                            <div class="table-box">
+                                <span class="table-name">@vm.Client.Name</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="list-right-section">
+                <h3>Catering Clients</h3>
+            <div class="list-content">
+                <table class="table items-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Address</th>
+                            <th>Paid</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Where(model => model.Client.Address != "Local"))
+                        {
+                            <tr>
+                                <td>@item.Client.Name</td>
+                                <td>@item.Client.Address</td>
+                                <td>@item.ActiveOrder?.IsPaid</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+   </div>
+</body>
+
+<style>
+    /* Container for the entire page */
+    .service-map-container {
+        display: flex;
+        height: 100vh; /* or any desired height */
+    }
+
+    /* Left grid occupying 75% */
+    .grid-left-section {
+        flex: 3; /* 75% if total flex units are 4 (3 + 1) */
+        padding: 10px;
+        background-color: #f0f0f0; /* optional styling */
+        overflow: auto;
+    }
+
+    /* Right list occupying 25% */
+    .list-right-section {
+        flex: 1; /* remaining 25% */
+        padding: 10px;
+        background-color: #e0e0e0; /* optional styling */
+        overflow: auto;
+    }
+
+    .tables-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* Adjust number of columns */
+        gap: 10px;
+    }
+
+    .table-box {
+        background-color: #8faadc;
+        border: 2px solid #333;
+        border-radius: 8px;
+        height: 80px; /* fixed height for each table */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+
+        .table-box:hover {
+            background-color: #6fa0c2;
+        }
+
+    .table-name {
+        padding: 5px;
+    }
+</style>
