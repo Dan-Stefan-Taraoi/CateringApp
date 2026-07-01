@@ -19,6 +19,11 @@
                         {
                             <div class="table-box">
                                 <span class="table-name">@vm.Client.Name</span>
+                                @{
+                                    var bulbClass = vm.ActiveOrder is null ? "bulb-grey" : // Default class
+                                    vm.ActiveOrder.IsPaid ? "bulb-green" : "bulb-red"; // Conditional classes
+                                }
+                                <span class="bulb @bulbClass"></span>
                             </div>
                         }
                     </div>
@@ -34,8 +39,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Address</th>
-                            <th>Paid</th>
-                            <th></th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,7 +48,15 @@
                             <tr>
                                 <td>@item.Client.Name</td>
                                 <td>@item.Client.Address</td>
-                                <td>@item.ActiveOrder?.IsPaid</td>
+                                @{
+                                    var bulbClass = item.ActiveOrder is null ? "bulb-grey" : // Default class
+                                    item.ActiveOrder.IsPaid ? "bulb-green" : "bulb-red"; // Conditional classes
+                                }
+                                <td>
+                                    <div class="bulb-efficiency">
+                                        <span class="bulb @bulbClass"></span>
+                                    </div>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -84,23 +96,66 @@
     }
 
     .table-box {
-        background-color: #8faadc;
+        background-color: #fff8f0;
         border: 2px solid #333;
         border-radius: 8px;
         height: 80px; /* fixed height for each table */
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         font-weight: bold;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s ease;
     }
 
-        .table-box:hover {
-            background-color: #6fa0c2;
-        }
+    .bulb-efficiency {
+        background-color: transparent;
+        border: 2px solid #333;
+        border-radius: 8px;
+        gap: 0.75rem;
+        height: 12px;
+        padding: 0.75rem;
+        border: 1px solid #e0c9aa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .table-box:hover {
+        background-color: #6fa0c2;
+    }
 
     .table-name {
         padding: 5px;
     }
+
+    .bulb-red {
+        background: #e74c3c;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+    }
+
+    .bulb-green {
+        background: #2ecc71;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+    }
+
+    .bulb-grey {
+        background: #bdc3c7;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+    }
+
 </style>
