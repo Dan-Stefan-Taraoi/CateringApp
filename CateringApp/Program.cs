@@ -11,11 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<MyAppContext>(options => 
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
- 
+
 // Kitchen — always the same
-builder.Services.AddScoped<RestaurantKitchenFactory>();
-builder.Services.AddScoped<CateringKitchenFactory>();
+builder.Services.AddScoped<IKitchenFactory, RestaurantKitchenFactory>();
+builder.Services.AddScoped<IKitchenFactory, CateringKitchenFactory>();
+
 builder.Services.AddScoped<KitchenFactoryResolver>();
+
 builder.Services.AddScoped<DishService>();
 
 // Add observer
