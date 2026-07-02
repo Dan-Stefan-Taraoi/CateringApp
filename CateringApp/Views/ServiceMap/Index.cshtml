@@ -4,66 +4,74 @@
 }
 
 <body>
-   <div class="service-map-container">
-        <div class="grid-left-section">
-            <h3>Tables Map</h3>
-            <div class="grid-content">
-                @if (!Model.Any())
-                {
-                    <p class="empty-note">No client items yet.</p>
-                }
-                else
-                {
-                    <div class="tables-grid">
-                        @foreach (var vm in Model.Where(model => model.Client.Address == "Local"))
-                        {
-                            <div class="table-box">
-                                <span class="table-name">@vm.Client.Name</span>
-                                @{
-                                    var bulbClass = vm.ActiveOrder is null ? "bulb-grey" : // Default class
-                                    vm.ActiveOrder.IsPaid ? "bulb-green" : "bulb-red"; // Conditional classes
-                                }
-                                <span class="bulb @bulbClass"></span>
-                            </div>
-                        }
-                    </div>
-                }
+    <div class="service-map-container">
+        <div class="left-section">
+            <div class="map-headerr">
+                <h3>Tables Map</h3>
+            </div>
+            <div class="grid-left-section">
+                <div class="grid-content">
+                    @if (!Model.Any())
+                    {
+                        <p class="empty-note">No client items yet.</p>
+                    }
+                    else
+                    {
+                        <div class="tables-grid">
+                            @foreach (var vm in Model.Where(model => model.Client.Address == "Local"))
+                            {
+                                <div class="table-box">
+                                    <span class="table-name">@vm.Client.Name</span>
+                                    @{
+                                        var bulbClass = vm.ActiveOrder is null ? "bulb-grey" : // Default class
+                                        vm.ActiveOrder.IsPaid ? "bulb-green" : "bulb-red"; // Conditional classes
+                                    }
+                                    <span class="bulb @bulbClass"></span>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <div class="list-right-section">
+        <div class="right-section">
+            <div class="map-headerr">
                 <h3>Catering Clients</h3>
-            <div class="list-content">
-                <table class="table items-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Address</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Where(model => model.Client.Address != "Local"))
-                        {
+            </div>
+            <div class="list-right-section">
+                <div class="list-content">
+                    <table class="table items-table">
+                        <thead>
                             <tr>
-                                <td>@item.Client.Name</td>
-                                <td>@item.Client.Address</td>
-                                @{
-                                    var bulbClass = item.ActiveOrder is null ? "bulb-grey" : // Default class
-                                    item.ActiveOrder.IsPaid ? "bulb-green" : "bulb-red"; // Conditional classes
-                                }
-                                <td>
-                                    <div class="bulb-efficiency">
-                                        <span class="bulb @bulbClass"></span>
-                                    </div>
-                                </td>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Status</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Where(model => model.Client.Address != "Local"))
+                            {
+                                <tr>
+                                    <td>@item.Client.Name</td>
+                                    <td>@item.Client.Address</td>
+                                    @{
+                                        var bulbClass = item.ActiveOrder is null ? "bulb-grey" : // Default class
+                                        item.ActiveOrder.IsPaid ? "bulb-green" : "bulb-red"; // Conditional classes
+                                    }
+                                    <td>
+                                        <div class="bulb-efficiency">
+                                            <span class="bulb @bulbClass"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-   </div>
+    </div>
 </body>
 
 <style>
@@ -71,22 +79,29 @@
     .service-map-container {
         display: flex;
         height: 100vh; /* or any desired height */
+        gap: 20px;
     }
 
     /* Left grid occupying 75% */
     .grid-left-section {
         flex: 3; /* 75% if total flex units are 4 (3 + 1) */
         padding: 10px;
-        background-color: #f0f0f0; /* optional styling */
-        overflow: auto;
+        background-color: #fdf7f0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e0c9aa;
+        width: 100%;
     }
 
     /* Right list occupying 25% */
     .list-right-section {
         flex: 1; /* remaining 25% */
         padding: 10px;
-        background-color: #e0e0e0; /* optional styling */
-        overflow: auto;
+        background-color: #fdf7f0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e0c9aa;
+        width: 100%;
     }
 
     .tables-grid {
@@ -96,13 +111,14 @@
     }
 
     .table-box {
-        background-color: #fff8f0;
+        background-color: #e8d5b0;
         border: 2px solid #333;
         border-radius: 8px;
         height: 80px; /* fixed height for each table */
         gap: 0.75rem;
         padding: 0.75rem;
-        border: 1px solid #e0c9aa;
+        border: 1px solid;
+        border-color: #a0522d;
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -111,6 +127,69 @@
         font-weight: bold;
         transition: background-color 0.3s ease;
     }
+
+
+
+    /* intoduced----------------------------------------------------------------------------------------------- */
+    .history-container {
+        padding: 1.5rem 0;
+    }
+
+    .map-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+        .map-header h3 {
+            color: #5a3010;
+            font-weight: 500;
+            margin: 0;
+        }
+
+    .empty-note {
+        color: #5a3010;
+        opacity: 0.6;
+        font-style: italic;
+    }
+
+    .items-table {
+        background-color: #fdf7f0;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e0c9aa;
+        width: 100%;
+    }
+
+        .items-table thead tr {
+            background-color: #e8d5b0;
+        }
+
+        .items-table thead th {
+            color: #3b2410;
+            font-weight: 600;
+            border-bottom: 2px solid #d4b896;
+            padding: 0.85rem 1rem;
+        }
+
+    .order-row {
+        border-bottom: 1px solid #eddfc8;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+    }
+
+        .order-row:hover {
+            background-color: #f5e9d5;
+        }
+
+    .items-table td {
+        color: #3b2410;
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+    }
+
+    /* intoduced----------------------------------------------------------------------------------------------- */
 
     .bulb-efficiency {
         background-color: transparent;
